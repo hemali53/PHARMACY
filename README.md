@@ -1,2 +1,2 @@
 # PHARMACY
-Pharmacy management system built with C#
+Pharmacy inventory management system built with C#
