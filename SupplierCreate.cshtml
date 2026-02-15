@@ -1,0 +1,28 @@
+﻿@page
+@model PHARMACY.Pages.SupplierCreateModel
+
+<h2>Add New Supplier</h2>
+
+<form method="post">
+    <div>
+        <label>Name</label>
+        <input type="text" asp-for="Supplier.Name" class="form-control" required />
+    </div>
+
+    <div>
+        <label>Address</label>
+        <input type="text" asp-for="Supplier.Address" class="form-control" />
+    </div>
+
+    <div>
+        <label>Phone</label>
+        <input type="text" asp-for="Supplier.Phone" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Save Supplier</button>
+</form>
+
+@if (TempData["Success"] != null)
+{
+    <p style="color:green">@TempData["Success"]</p>
+}

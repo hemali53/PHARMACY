@@ -1,0 +1,511 @@
+﻿@page
+@model PHARMACY.Pages.GRNModel
+@using Newtonsoft.Json
+@{
+    ViewData["Title"] = "Goods Received Note (GRN)";
+    Layout = "_Layout";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GRN Entry</title>
+    <style>
+        body {
+            background: #f4f7fb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2 {
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 6px;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        input[type="text"], select {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+
+            input:focus, select:focus {
+                border-color: #007bff;
+                box-shadow: 0 0 4px rgba(0,123,255,0.4);
+            }
+
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s ease;
+        }
+
+            .btn:hover {
+                background: #005ec9;
+            }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+            .btn-secondary:hover {
+                background: #5a6268;
+            }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 5px;
+            border-bottom: 1px solid #e1e1e1;
+            text-align: left;
+        }
+
+        th {
+            background: #007bff;
+            color: #fff;
+        }
+
+        .summary {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+            .summary div {
+                margin: 5px 0;
+            }
+
+            .summary strong {
+                color: #007bff;
+            }
+
+        .actions {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+            .actions .btn {
+                margin: 0 10px;
+            }
+
+        .toggle-discount {
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+
+        .message {
+            text-align: center;
+            color: green;
+            margin-bottom: 15px;
+        }
+
+        .auto-fill-fields {
+            background-color: #f8f9fa;
+        }
+
+        /* Medicine Search Styles */
+        .medicine-search-container {
+            position: relative;
+        }
+
+        .medicine-search {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .batch-selection {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .batch-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+            .batch-option:hover {
+                background: #007bff;
+                color: white;
+            }
+
+            .batch-option.selected {
+                background: #007bff;
+                color: white;
+            }
+
+        .batch-info {
+            font-size: 11px;
+            color: #6c757d;
+            margin-top: 2px;
+        }
+
+        .no-batches {
+            padding: 8px 12px;
+            color: #dc3545;
+            font-style: italic;
+        }
+
+        /* Ensure table cells have proper spacing */
+        .medicine-cell {
+            position: relative;
+            min-width: 200px;
+        }
+
+        .batch-cell {
+            min-width: 120px;
+        }
+
+        .quantity-cell, .price-cell, .discount-cell, .total-cell {
+            min-width: 100px;
+        }
+
+        .action-cell {
+            min-width: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Goods Received Note (GRN)</h2>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="message">@TempData["SuccessMessage"]</div>
+        }
+
+        <form method="post" id="grnForm">
+            <input type="hidden" asp-for="ItemsJson" id="ItemsJson" />
+
+            <h3 style="color:#007bff;">Invoice Details</h3>
+            <div class="form-row">
+                <select asp-for="Input.Location">
+                    <option value="">Select Location</option>
+                    <option>Kurunegala</option>
+                    <option>Gampaha</option>
+                    <option>Kegalle</option>
+                </select>
+                <input type="text" asp-for="Input.InvoiceNumber" placeholder="Invoice Number" />
+            </div>
+
+            <h3 style="color:#007bff;">
+                Supplier Details
+                <a href="/SupplierCreate" class="btn btn-secondary" style="float:right;">+ Add Supplier</a>
+            </h3>
+
+            <div class="form-row">
+                <select asp-for="Input.SupplierId" id="supplierDropdown" asp-items="Model.SupplierSelectList">
+                    <option value="">Select Supplier</option>
+                </select>
+                <input type="text" asp-for="Input.SupplierAddress" id="supplierAddress" placeholder="Supplier Address" class="auto-fill-fields" readonly />
+                <input type="text" asp-for="Input.SupplierPhone" id="supplierPhone" placeholder="Supplier Phone" class="auto-fill-fields" readonly />
+            </div>
+
+            <h3 style="color:#007bff;">Products</h3>
+            <table id="itemsTable">
+                <thead>
+                    <tr>
+                        <th class="medicine-cell">Medicine</th>
+                        <th class="batch-cell">Batch</th>
+                        <th class="quantity-cell">Quantity</th>
+                        <th class="price-cell">Purchase Price</th>
+                        <th class="discount-cell">Discount (%)</th>
+                        <th class="total-cell">Line Total</th>
+                        <th class="action-cell">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows will be added dynamically -->
+                </tbody>
+            </table>
+
+            <button type="button" class="btn" onclick="addRow()">+ Add Item</button>
+
+            <div class="toggle-discount">
+                <label><strong>Apply VAT?</strong></label>
+                <input type="checkbox" asp-for="Input.VAT" id="vatCheck" />
+            </div>
+
+            <div class="summary">
+                <div>Invoice Total: <strong id="invoiceTotal">0.00</strong></div>
+                <div>Total Discount: <strong id="totalDiscount">0.00</strong></div>
+                <div style="font-size:18px;">Grand Total: <strong id="grandTotal">0.00</strong></div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn">Submit GRN</button>
+                <button type="reset" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Model data
+        const allSuppliersData = @Html.Raw(JsonConvert.SerializeObject(Model.AllSuppliers));
+        const allMedicinesData = @Html.Raw(JsonConvert.SerializeObject(Model.AllMedicines));
+
+        let items = [];
+        let activeBatchDropdown = null;
+
+        // Auto-fill supplier logic
+        document.addEventListener('DOMContentLoaded', function () {
+            const supplierDropdown = document.getElementById('supplierDropdown');
+            const addressField = document.getElementById('supplierAddress');
+            const phoneField = document.getElementById('supplierPhone');
+
+            if (supplierDropdown) {
+                supplierDropdown.addEventListener('change', function() {
+                    const selectedSupplierId = this.value;
+
+                    if (selectedSupplierId) {
+                        const supplier = allSuppliersData.find(s => s.Id.toString() === selectedSupplierId);
+
+                        if (supplier) {
+                            addressField.value = supplier.Address || '';
+                            phoneField.value = supplier.Phone || '';
+                        } else {
+                            addressField.value = "";
+                            phoneField.value = "";
+                        }
+                    } else {
+                        addressField.value = "";
+                        phoneField.value = "";
+                    }
+                });
+            }
+
+            // Close batch dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (activeBatchDropdown && !activeBatchDropdown.contains(e.target)) {
+                    activeBatchDropdown.style.display = 'none';
+                    activeBatchDropdown = null;
+                }
+            });
+
+            // Initialize first row
+            addRow();
+        });
+
+        function addRow() {
+            const table = document.querySelector("#itemsTable tbody");
+            const row = document.createElement("tr");
+            const rowId = Date.now(); // Unique ID for each row
+
+            row.innerHTML = `
+                <td class="medicine-cell">
+                    <div class="medicine-search-container">
+                        <input type="text" class="pname medicine-search" placeholder="Search medicine..."
+                               data-row="${rowId}" />
+                        <input type="hidden" class="medicine-id" value="0" />
+                        <div class="batch-selection" id="batchSelection-${rowId}"></div>
+                    </div>
+                </td>
+                <td class="batch-cell">
+                    <input type="text" class="batch-number" placeholder="Select batch" readonly />
+                    <div class="batch-info"></div>
+                </td>
+                <td class="quantity-cell"><input type="number" class="qty" value="0" min="0" step="0.01" /></td>
+                <td class="price-cell"><input type="number" class="price" value="0" min="0" step="0.01" readonly /></td>
+                <td class="discount-cell"><input type="number" class="disc" value="0" min="0" step="0.01" /></td>
+                <td class="total-cell"><input type="text" class="ltotal" value="0.00" readonly /></td>
+                <td class="action-cell"><button type="button" class="btn btn-secondary" onclick="removeRow(this)">X</button></td>
+            `;
+
+            table.appendChild(row);
+            initializeMedicineSearch(row);
+
+            // Add event listeners for calculations
+            row.querySelectorAll('.qty, .disc').forEach(input => {
+                input.addEventListener('input', updateTotals);
+            });
+
+            updateTotals();
+        }
+
+        function initializeMedicineSearch(row) {
+            const medicineInput = row.querySelector('.medicine-search');
+            const medicineIdInput = row.querySelector('.medicine-id');
+            const batchSelection = row.querySelector('.batch-selection');
+            const batchNumberInput = row.querySelector('.batch-number');
+            const batchInfo = row.querySelector('.batch-info');
+            const priceInput = row.querySelector('.price');
+
+            medicineInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+
+                // Find matching medicines
+                const matchingMedicines = allMedicinesData.filter(m =>
+                    m.Name.toLowerCase().includes(searchTerm)
+                );
+
+                if (matchingMedicines.length > 0 && searchTerm.length > 1) {
+                    // Show batch selection dropdown
+                    batchSelection.innerHTML = '';
+
+                    matchingMedicines.forEach(medicine => {
+                        if (medicine.Batches.length > 0) {
+                            medicine.Batches.forEach(batch => {
+                                const batchOption = document.createElement('div');
+                                batchOption.className = 'batch-option';
+                                batchOption.innerHTML = `
+                                    <div><strong>${batch.BatchNumber}</strong></div>
+                                    <div class="batch-info">${medicine.Name} | Stock: ${batch.Quantity} | Price: Rs.${batch.PurchasePrice}</div>
+                                `;
+
+                                batchOption.onclick = function() {
+                                    // Set the selected values
+                                    medicineInput.value = medicine.Name;
+                                    medicineIdInput.value = medicine.MedicineID;
+                                    batchNumberInput.value = batch.BatchNumber;
+                                    priceInput.value = batch.PurchasePrice;
+                                    batchInfo.innerHTML = `Stock: ${batch.Quantity}`;
+
+                                    // Hide dropdown
+                                    batchSelection.style.display = 'none';
+                                    activeBatchDropdown = null;
+
+                                    updateTotals();
+                                };
+
+                                batchSelection.appendChild(batchOption);
+                            });
+                        } else {
+                            const noBatchOption = document.createElement('div');
+                            noBatchOption.className = 'no-batches';
+                            noBatchOption.textContent = `No batches available for ${medicine.Name}`;
+                            batchSelection.appendChild(noBatchOption);
+                        }
+                    });
+
+                    // Show dropdown
+                    batchSelection.style.display = 'block';
+                    activeBatchDropdown = batchSelection;
+
+                } else {
+                    // Hide dropdown if no matches or search term too short
+                    batchSelection.style.display = 'none';
+                    activeBatchDropdown = null;
+
+                    // Reset fields if medicine not found
+                    if (searchTerm.length === 0) {
+                        medicineIdInput.value = '0';
+                        batchNumberInput.value = '';
+                        priceInput.value = '0';
+                        batchInfo.innerHTML = '';
+                    }
+                }
+
+                updateTotals();
+            });
+
+            // Also show dropdown when focusing on the input
+            medicineInput.addEventListener('focus', function() {
+                if (this.value.length > 1) {
+                    this.dispatchEvent(new Event('input'));
+                }
+            });
+        }
+
+        function removeRow(btn) {
+            btn.closest("tr").remove();
+            updateTotals();
+        }
+
+        function updateTotals() {
+            let invoiceTotal = 0;
+            let totalDiscount = 0;
+            items = [];
+
+            document.querySelectorAll("#itemsTable tbody tr").forEach(row => {
+                const medicineName = row.querySelector(".pname").value.trim();
+                const medicineId = row.querySelector(".medicine-id").value;
+                const batchNumber = row.querySelector(".batch-number").value;
+                const qty = parseFloat(row.querySelector(".qty").value) || 0;
+                const price = parseFloat(row.querySelector(".price").value) || 0;
+                const disc = parseFloat(row.querySelector(".disc").value) || 0;
+
+                const line = qty * price;
+                const discAmt = line * (disc / 100);
+                const lineTotal = line - discAmt;
+
+                row.querySelector(".ltotal").value = lineTotal.toFixed(2);
+
+                invoiceTotal += lineTotal;
+                totalDiscount += discAmt;
+
+                items.push({
+                    ProductName: medicineName,
+                    MedicineID: parseInt(medicineId) || 0,
+                    BatchNumber: batchNumber,
+                    Quantity: qty,
+                    PurchasePrice: price,
+                    DiscountPercent: disc,
+                    LineTotal: lineTotal
+                });
+            });
+
+            const vatApplied = document.getElementById("vatCheck").checked;
+            const vat = vatApplied ? invoiceTotal * 0.12 : 0;
+            const grandTotal = invoiceTotal + vat;
+
+            document.getElementById("invoiceTotal").innerText = invoiceTotal.toFixed(2);
+            document.getElementById("totalDiscount").innerText = totalDiscount.toFixed(2);
+            document.getElementById("grandTotal").innerText = grandTotal.toFixed(2);
+
+            document.getElementById("ItemsJson").value = JSON.stringify(items);
+        }
+
+        function resetForm() {
+            document.getElementById('supplierAddress').value = "";
+            document.getElementById('supplierPhone').value = "";
+            document.querySelector("#itemsTable tbody").innerHTML = "";
+            addRow();
+            updateTotals();
+        }
+
+        document.getElementById("vatCheck").addEventListener("change", updateTotals);
+    </script>
+</body>
+</html>
