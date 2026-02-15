@@ -1,0 +1,385 @@
+﻿@* @page
+@model PHARMACY.Pages.CustomerRegisterModel
+@{
+    ViewData["Title"] = "Customer Registration";
+    Layout = "_Layout";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-user-plus"></i> Customer Registration
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Customer.Name" class="form-label">Full Name *</label>
+                                    <input asp-for="Customer.Name" class="form-control" placeholder="Enter customer full name" />
+                                    <span asp-validation-for="Customer.Name" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Customer.PhoneNumber" class="form-label">Phone Number *</label>
+                                    <input asp-for="Customer.PhoneNumber" class="form-control" placeholder="07XXXXXXXX" />
+                                    <span asp-validation-for="Customer.PhoneNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Customer.Address" class="form-label">Address *</label>
+                            <textarea asp-for="Customer.Address" class="form-control" rows="3" placeholder="Enter complete address"></textarea>
+                            <span asp-validation-for="Customer.Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Customer.Area" class="form-label">Area / Town *</label>
+                            <input asp-for="Customer.Area" class="form-control" placeholder="Enter area or town" />
+                            <span asp-validation-for="Customer.Area" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group form-check mb-3">
+                            <input asp-for="Customer.IsVat" class="form-check-input" type="checkbox" />
+                            <label asp-for="Customer.IsVat" class="form-check-label">VAT Registered</label>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Customer.Email" class="form-label">Email Address</label>
+                            <input asp-for="Customer.Email" class="form-control" placeholder="customer@example.com" />
+                            <span asp-validation-for="Customer.Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-success me-2">
+                                <i class="fas fa-save"></i> Register Customer
+                            </button>
+                            <a href="/" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+            {
+                <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                    <i class="fas fa-check-circle"></i> @Model.SuccessMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i> @Model.ErrorMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.getElementById('Customer_PhoneNumber').addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.startsWith('0')) {
+                value = value.substring(1);
+            }
+            if (value.length > 0) {
+                e.target.value = '0' + value;
+            }
+        });
+    </script>
+}
+
+}
+ *@
+
+
+
+@page
+@model PHARMACY.Pages.CustomerRegisterModel
+@{
+    ViewData["Title"] = "Customer Registration";
+    Layout = "_Layout";
+}
+
+<div class="container">
+    <div class="row">
+        <!-- Left Column - Registration Form -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-user-plus"></i> Customer Registration
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="NewCustomer.Name" class="form-label">Full Name *</label>
+                                    <input asp-for="NewCustomer.Name" class="form-control" placeholder="Enter customer full name" />
+                                    <span asp-validation-for="NewCustomer.Name" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="NewCustomer.PhoneNumber" class="form-label">Phone Number *</label>
+                                    <input asp-for="NewCustomer.PhoneNumber" class="form-control" placeholder="07XXXXXXXX" />
+                                    <span asp-validation-for="NewCustomer.PhoneNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="NewCustomer.Address" class="form-label">Address *</label>
+                            <textarea asp-for="NewCustomer.Address" class="form-control" rows="3" placeholder="Enter complete address"></textarea>
+                            <span asp-validation-for="NewCustomer.Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="NewCustomer.Area" class="form-label">Area / Town *</label>
+                            <input asp-for="NewCustomer.Area" class="form-control" placeholder="Enter area or town" />
+                            <span asp-validation-for="NewCustomer.Area" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group form-check mb-3">
+                            <input asp-for="NewCustomer.IsVat" class="form-check-input" type="checkbox" />
+                            <label asp-for="NewCustomer.IsVat" class="form-check-label">VAT Registered</label>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="NewCustomer.Email" class="form-label">Email Address</label>
+                            <input asp-for="NewCustomer.Email" class="form-control" placeholder="customer@example.com" />
+                            <span asp-validation-for="NewCustomer.Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-success me-2">
+                                <i class="fas fa-save"></i> Register Customer
+                            </button>
+                            <button type="reset" class="btn btn-warning">
+                                <i class="fas fa-redo"></i> Reset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Customer List -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-users"></i> Customer List
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Search Bar -->
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="searchArea" placeholder="Search by Area/Town...">
+                        <button class="btn btn-outline-secondary" type="button" id="btnSearch">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <button class="btn btn-outline-secondary" type="button" id="btnClear">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <!-- Customer Table -->
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Area</th>
+                                    <th>VAT</th>
+                                    <th>View</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customerTableBody">
+                                @foreach (var customer in Model.CustomerList)
+                                {
+                                    <tr>
+                                        <td>@customer.Id</td>
+                                        <td>@customer.Name</td>
+                                        <td>@customer.PhoneNumber</td>
+                                        <td>@customer.Area</td>
+                                        <td>
+                                            @if (customer.IsVat)
+                                            {
+                                                <span class="badge bg-success">Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">No</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info" onclick="viewCustomer(@customer.Id, '@customer.Name', '@customer.PhoneNumber', '@customer.Address', '@customer.Area', '@customer.Email', @customer.IsVat.ToString().ToLower(), '@customer.RegistrationDate.ToString("yyyy-MM-dd")')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="row mt-3">
+        <div class="col-12">
+            @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> @Model.SuccessMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i> @Model.ErrorMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Customer Details Modal -->
+<div class="modal fade" id="customerModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Customer Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="row">
+                    <dt class="col-sm-4">ID:</dt>
+                    <dd class="col-sm-8" id="detailId"></dd>
+
+                    <dt class="col-sm-4">Name:</dt>
+                    <dd class="col-sm-8" id="detailName"></dd>
+
+                    <dt class="col-sm-4">Phone:</dt>
+                    <dd class="col-sm-8" id="detailPhone"></dd>
+
+                    <dt class="col-sm-4">Address:</dt>
+                    <dd class="col-sm-8" id="detailAddress"></dd>
+
+                    <dt class="col-sm-4">Area:</dt>
+                    <dd class="col-sm-8" id="detailArea"></dd>
+
+                    <dt class="col-sm-4">Email:</dt>
+                    <dd class="col-sm-8" id="detailEmail"></dd>
+
+                    <dt class="col-sm-4">VAT:</dt>
+                    <dd class="col-sm-8" id="detailVat"></dd>
+
+                    <dt class="col-sm-4">Reg Date:</dt>
+                    <dd class="col-sm-8" id="detailRegDate"></dd>
+                </dl>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Phone number formatting
+        document.getElementById('NewCustomer_PhoneNumber').addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.startsWith('0')) {
+                value = value.substring(1);
+            }
+            if (value.length > 0) {
+                e.target.value = '0' + value;
+            }
+        });
+
+        // Search functionality
+        document.getElementById('btnSearch').addEventListener('click', searchCustomers);
+        document.getElementById('btnClear').addEventListener('click', clearSearch);
+        document.getElementById('searchArea').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchCustomers();
+            }
+        });
+
+        function searchCustomers() {
+            const searchText = document.getElementById('searchArea').value.toLowerCase();
+            const rows = document.querySelectorAll('#customerTableBody tr');
+
+            rows.forEach(row => {
+                const area = row.cells[3].textContent.toLowerCase();
+                if (area.includes(searchText) || searchText === '') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function clearSearch() {
+            document.getElementById('searchArea').value = '';
+            searchCustomers();
+        }
+
+        // View customer details
+        function viewCustomer(id, name, phone, address, area, email, isVat, regDate) {
+            document.getElementById('detailId').textContent = id;
+            document.getElementById('detailName').textContent = name;
+            document.getElementById('detailPhone').textContent = phone;
+            document.getElementById('detailAddress').textContent = address;
+            document.getElementById('detailArea').textContent = area;
+            document.getElementById('detailEmail').textContent = email || 'Not provided';
+            document.getElementById('detailVat').innerHTML = isVat === 'true'
+                ? '<span class="badge bg-success">Yes</span>'
+                : '<span class="badge bg-secondary">No</span>';
+            document.getElementById('detailRegDate').textContent = regDate;
+
+            const modal = new bootstrap.Modal(document.getElementById('customerModal'));
+            modal.show();
+        }
+
+        // Auto refresh on success
+        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+                <text>
+                setTimeout(() => {
+                    window.location.href = '/Customer/Register';
+                }, 6000);
+                </text>
+        }
+    </script>
+}
