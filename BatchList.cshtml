@@ -1,0 +1,74 @@
+﻿@page
+@model PHARMACY.Pages.Medicines.BatchListModel
+@{
+    ViewData["Title"] = "Medicine Batches";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-boxes text-primary"></i>
+            Batches for: @Model.MedicineName
+        </h2>
+        <div>
+            <a href="/Medicines/AddBatch?id=@Model.MedicineID" class="btn btn-primary me-2">
+                <i class="fas fa-plus"></i> Add New Batch
+            </a>
+            <a href="/Medicines" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Medicines
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            @if (Model.Batches.Any())
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Batch Number</th>
+                            <th>Quantity</th>
+                            <th>Purchase Price</th>
+                            <th>Selling Price</th>
+                            <th>Manufacture Date</th>
+                            <th>Expiry Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var batch in Model.Batches)
+                        {
+                            <tr>
+                                <td>@batch.BatchNumber</td>
+                                <td>@batch.Quantity</td>
+                                <td>LKR @batch.PurchasePrice.ToString("F2")</td>
+                                <td>LKR @batch.SellingPrice.ToString("F2")</td>
+                                <td>@batch.ManufactureDate?.ToString("yyyy-MM-dd")</td>
+                                <td>@batch.ExpiryDate?.ToString("yyyy-MM-dd")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No Batches Found</h4>
+                    <p class="text-muted">No batches have been added for this medicine yet.</p>
+                    <a href="/Medicines/AddBatch?id=@Model.MedicineID" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add First Batch
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
