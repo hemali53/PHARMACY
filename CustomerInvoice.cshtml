@@ -1,0 +1,1243 @@
+﻿@page
+@model PHARMACY.Pages.Billing.CustomerInvoiceModel
+@{
+    ViewData["Title"] = "Customer Invoice";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Customer Invoice</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* Your CSS styles remain the same */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+        .invoice-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+
+        h3 {
+            color: #007bff;
+            font-weight: 600;
+        }
+
+        .section-title {
+            font-weight: 600;
+            color: #333;
+            margin-top: 15px;
+        }
+
+        .table thead {
+            background-color: #f1f1f1;
+        }
+
+        .summary {
+            font-weight: bold;
+        }
+
+            .summary td {
+                border: none !important;
+            }
+
+        .totals {
+            text-align: right;
+        }
+
+        .btn-group {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .text-red {
+            color: red;
+        }
+
+        .text-blue {
+            color: blue;
+        }
+
+        .item-row {
+            cursor: pointer;
+        }
+
+            .item-row:hover {
+                background-color: #f8f9fa;
+            }
+
+        .autocomplete-suggestions {
+            border: 1px solid #ddd;
+            max-height: 200px;
+            overflow-y: auto;
+            position: absolute;
+            background: white;
+            z-index: 1000;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .autocomplete-suggestion {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+
+            .autocomplete-suggestion:hover {
+                background-color: #f0f0f0;
+            }
+
+            .autocomplete-suggestion:last-child {
+                border-bottom: none;
+            }
+
+        .invoice-number {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .stock-info {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .batch-info {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .form-control:read-only {
+            background-color: #f8f9fa;
+        }
+
+        .new-customer-notice {
+            font-size: 0.8em;
+            color: #28a745;
+            font-style: italic;
+        }
+
+        .customer-type-indicator {
+            font-size: 0.7em;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+
+        .existing-customer {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .new-customer {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .price-editable {
+            background-color: #fff3cd !important;
+            border: 1px solid #ffeaa7 !important;
+        }
+
+        /* Batch search improvements */
+        .batch-search-container {
+            position: relative;
+        }
+
+        .batch-search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1001;
+            display: none;
+        }
+
+        .batch-search-result {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+
+            .batch-search-result:hover {
+                background-color: #f8f9fa;
+            }
+
+            .batch-search-result:last-child {
+                border-bottom: none;
+            }
+
+        .batch-stock-info {
+            font-size: 0.8em;
+            color: #666;
+            float: right;
+        }
+
+        .batch-expiry-info {
+            font-size: 0.8em;
+            color: #dc3545;
+            display: block;
+        }
+
+        .batch-price-info {
+            font-size: 0.8em;
+            color: #28a745;
+            display: block;
+        }
+
+        .hidden-fields {
+            display: none;
+        }
+
+        .item-fields {
+            display: none;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3><i class="bi bi-file-earmark-text"></i> Customer Invoice</h3>
+            <div>
+                <span class="text-red me-3" id="stockDisplay">Stock: 0</span>
+                <span class="text-blue" id="batchDisplay">Batch: 0</span>
+            </div>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <form method="post" id="invoiceForm">
+            @Html.AntiForgeryToken()
+
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label class="form-label">Invoice No</label>
+                    <input type="text" class="form-control invoice-number" asp-for="Invoice.InvoiceNumber" readonly />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-control" asp-for="Invoice.InvoiceDate" required />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Invoice Type</label>
+                    <select class="form-select" asp-for="Invoice.InvoiceType" id="invoiceType" required>
+                        <option value="Credit Invoice">Credit Invoice</option>
+                        <option value="OutStanding Invoice">OutStanding Invoice</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Representative</label>
+                    <select class="form-select" asp-for="Invoice.RepresentativeId" id="representativeSelect">
+                        <option value="">Select Representative</option>
+                        @foreach (var rep in Model.Representatives)
+                        {
+                            <option value="@rep.RepresentativeId" data-name="@rep.RepresentativeName">
+                                @rep.RepresentativeName (@rep.Code)
+                            </option>
+                        }
+                    </select>
+                    <input type="hidden" asp-for="Invoice.RepresentativeName" id="representativeName" />
+                </div>
+            </div>
+
+            <!-- Customer section -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <label class="form-label">Customer Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="customerSearch" placeholder="Type customer name..." required />
+                    <div id="customerSuggestions" class="autocomplete-suggestions d-none"></div>
+                    <input type="hidden" asp-for="Invoice.CustomerId" id="customerId" />
+                    <input type="hidden" asp-for="Invoice.CustomerName" id="customerName" />
+                    <div id="customerTypeIndicator" class="new-customer-notice mt-1 d-none"></div>
+                    <div id="customerError" class="error-message"></div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Customer Address</label>
+                    <input type="text" class="form-control" asp-for="Invoice.CustomerAddress" id="customerAddress" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Customer Number</label>
+                    <input type="text" class="form-control" asp-for="Invoice.CustomerPhone" id="customerPhone" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">PO Number</label>
+                    <input type="text" class="form-control" asp-for="Invoice.PONumber" />
+                </div>
+            </div>
+
+            <!-- Medicine section -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label class="form-label">Medicine</label>
+                    <input type="text" class="form-control" id="medicineSearch" placeholder="Search medicine..." />
+                    <input type="hidden" id="selectedMedicineId" />
+                    <div id="medicineSuggestions" class="autocomplete-suggestions d-none"></div>
+                    <div id="medicineError" class="error-message"></div>
+                </div>
+                <div class="col-md-2 batch-search-container">
+                    <label class="form-label">Batch No</label>
+                    <input type="text" class="form-control" id="batchSearch" placeholder="Search batch..." />
+                    <div id="batchSearchResults" class="batch-search-results"></div>
+                    <input type="hidden" id="selectedBatchId" />
+                    <div id="batchError" class="error-message"></div>
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">Qty</label>
+                    <input type="number" class="form-control" id="quantity" min="1" value="1" />
+                    <div id="quantityError" class="error-message"></div>
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">Free</label>
+                    <input type="number" class="form-control" id="freeQty" min="0" value="0" />
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">Unit Price</label>
+                    <input type="number" class="form-control price-editable" id="unitPrice" step="0.01" />
+                    <div id="priceError" class="error-message"></div>
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">Amount</label>
+                    <input type="number" class="form-control" id="amount" step="0.01" readonly />
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">Dis %</label>
+                    <input type="number" class="form-control" id="discountPercent" min="0" max="100" value="0" step="0.01" />
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">Dis Value</label>
+                    <input type="number" class="form-control" id="discountValue" step="0.01" readonly />
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-success w-100" id="addItemBtn">
+                        <i class="bi bi-plus-circle"></i> Add
+                    </button>
+                </div>
+            </div>
+
+            <!-- Items table -->
+            <table class="table table-bordered table-sm align-middle text-center" id="itemsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Code</th>
+                        <th>Medicine Name</th>
+                        <th>Batch No</th>
+                        <th>MNF Date</th>
+                        <th>EXP Date</th>
+                        <th>Qty</th>
+                        <th>Free</th>
+                        <th>Unit Price</th>
+                        <th>Amount</th>
+                        <th>Dis %</th>
+                        <th>Discount Value</th>
+                        <th>Net Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="invoiceItemsBody">
+                    <!-- Items will be dynamically added here -->
+                    @if (Model.InvoiceItems.Any())
+                    {
+                        @for (int i = 0; i < Model.InvoiceItems.Count; i++)
+                        {
+                            <tr class="item-row" data-medicine-id="@Model.InvoiceItems[i].MedicineId" data-batch-id="@Model.InvoiceItems[i].BatchId">
+                                <td>@Model.InvoiceItems[i].Code</td>
+                                <td>@Model.InvoiceItems[i].MedicineName</td>
+                                <td>@Model.InvoiceItems[i].BatchNumber</td>
+                                <td>@Model.InvoiceItems[i].MfgDate.ToString("yyyy-MM-dd")</td>
+                                <td>@Model.InvoiceItems[i].ExpDate.ToString("yyyy-MM-dd")</td>
+                                <td>@Model.InvoiceItems[i].Quantity</td>
+                                <td>@Model.InvoiceItems[i].FreeQty</td>
+                                <td>@Model.InvoiceItems[i].UnitPrice.ToString("N2")</td>
+                                <td>@Model.InvoiceItems[i].Amount.ToString("N2")</td>
+                                <td>@Model.InvoiceItems[i].DiscountPercent.ToString("N2")</td>
+                                <td>@Model.InvoiceItems[i].DiscountValue.ToString("N2")</td>
+                                <td>@Model.InvoiceItems[i].NetAmount.ToString("N2")</td>
+                                <td>
+                                    <button type="button" class="btn btn-danger btn-sm remove-item">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr id="noItemsRow">
+                            <td colspan="13" class="text-muted text-center">No items added</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <!-- Hidden container for form binding -->
+            <div id="hiddenItemsContainer" class="hidden-fields">
+                @for (int i = 0; i < Model.InvoiceItems.Count; i++)
+                {
+                    <div class="item-fields" data-index="@i">
+                        <input type="hidden" asp-for="InvoiceItems[i].MedicineId" />
+                        <input type="hidden" asp-for="InvoiceItems[i].MedicineName" />
+                        <input type="hidden" asp-for="InvoiceItems[i].Code" />
+                        <input type="hidden" asp-for="InvoiceItems[i].BatchId" />
+                        <input type="hidden" asp-for="InvoiceItems[i].BatchNumber" />
+                        <input type="hidden" asp-for="InvoiceItems[i].MfgDate" />
+                        <input type="hidden" asp-for="InvoiceItems[i].ExpDate" />
+                        <input type="hidden" asp-for="InvoiceItems[i].Quantity" />
+                        <input type="hidden" asp-for="InvoiceItems[i].FreeQty" />
+                        <input type="hidden" asp-for="InvoiceItems[i].UnitPrice" />
+                        <input type="hidden" asp-for="InvoiceItems[i].Amount" />
+                        <input type="hidden" asp-for="InvoiceItems[i].DiscountPercent" />
+                        <input type="hidden" asp-for="InvoiceItems[i].DiscountValue" />
+                        <input type="hidden" asp-for="InvoiceItems[i].NetAmount" />
+                    </div>
+                }
+            </div>
+
+            <!-- Summary section -->
+            <div class="row mt-3">
+                <div class="col-md-8">
+                    <label class="form-label">Note</label>
+                    <textarea class="form-control" rows="3" asp-for="Invoice.Note"></textarea>
+                </div>
+                <div class="col-md-4">
+                    <table class="table summary">
+                        <tr><td>Gross Value</td><td class="text-end" id="grossValue">0.00</td></tr>
+                        <tr><td>Discount</td><td class="text-end" id="totalDiscount">0.00</td></tr>
+
+                        <!-- VAT Percentage Input -->
+                        <tr>
+                            <td>VAT %</td>
+                            <td class="text-end">
+                                <input type="number" class="form-control form-control-sm"
+                                       id="vatPercentage" value="18" step="0.01" min="0" max="100" />
+                            </td>
+                        </tr>
+                        <tr><td>VAT Value</td><td class="text-end" id="vatValue">0.00</td></tr>
+                        <tr>
+                            <td>Add Value</td>
+                            <td class="text-end">
+                                <input type="number" class="form-control form-control-sm" asp-for="Invoice.AddValue" id="addValue" value="0" step="0.01" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Less Value</td>
+                            <td class="text-end">
+                                <input type="number" class="form-control form-control-sm" asp-for="Invoice.LessValue" id="lessValue" value="0" step="0.01" />
+                            </td>
+                        </tr>
+                        <tr><td class="text-danger">Net Value</td><td class="text-end text-danger fw-bold" id="netValue">0.00</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <input type="hidden" asp-for="Invoice.GrossValue" id="inputGrossValue" />
+            <input type="hidden" asp-for="Invoice.VATValue" id="inputVATValue" />
+            <input type="hidden" asp-for="Invoice.DiscountValue" id="inputDiscountValue" />
+            <input type="hidden" asp-for="Invoice.NetValue" id="inputNetValue" />
+            <input type="hidden" asp-for="Invoice.VATPercentage" id="inputVATPercentage" />
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary" asp-page-handler="SaveInvoice" id="saveBtn">
+                    <i class="bi bi-save"></i> Save Invoice
+                </button>
+
+                <!-- Print button will be shown only after successful save -->
+                @{
+                    var invoiceId = TempData["SavedInvoiceId"] as int?;
+                    var invoiceNumber = TempData["SavedInvoiceNumber"] as string;
+                    var hasSavedInvoice = invoiceId.HasValue && invoiceId.Value > 0;
+                }
+
+                @if (hasSavedInvoice)
+                {
+                    <a href="@Url.Page("/Billing/PrintInvoice", new { id = invoiceId })"
+                       target="_blank"
+                       class="btn btn-success" id="printBtn">
+                        <i class="bi bi-printer"></i> Print Invoice @invoiceNumber
+                    </a>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-success" id="printBtn" disabled>
+                        <i class="bi bi-printer"></i> Print Invoice
+                    </button>
+                }
+
+                <button type="submit" class="btn btn-secondary" asp-page-handler="Clear">
+                    <i class="bi bi-x-circle"></i> Clear
+                </button>
+                <button type="button" class="btn btn-danger" onclick="window.history.back();">
+                    <i class="bi bi-door-closed"></i> Close
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Browser refresh script -->
+    <script src="/framework/aspectcore-browser-refresh.js"></script>
+
+    <script>
+        // Initialize itemCounter with the correct count
+        let itemCounter = @(Model.InvoiceItems?.Count ?? 0);
+
+        // Customer search with autocomplete
+        let customerSearchTimeout;
+        document.getElementById('customerSearch').addEventListener('input', function() {
+            clearTimeout(customerSearchTimeout);
+            customerSearchTimeout = setTimeout(() => {
+                const searchTerm = this.value.trim();
+                const customerTypeIndicator = document.getElementById('customerTypeIndicator');
+
+                if (searchTerm.length < 2) {
+                    document.getElementById('customerSuggestions').classList.add('d-none');
+                    customerTypeIndicator.classList.add('d-none');
+                    return;
+                }
+
+                const customers = @Html.Raw(Json.Serialize(Model.Customers));
+                const suggestions = document.getElementById('customerSuggestions');
+                suggestions.innerHTML = '';
+
+                const filteredCustomers = customers.filter(customer =>
+                    customer.name.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+
+                if (filteredCustomers.length > 0) {
+                    filteredCustomers.forEach(customer => {
+                        const div = document.createElement('div');
+                        div.className = 'autocomplete-suggestion';
+                        div.innerHTML = `
+                            ${customer.name} - ${customer.phoneNumber || 'No Phone'}
+                            <span class="customer-type-indicator existing-customer">Existing</span>
+                        `;
+                        div.setAttribute('data-id', customer.customerID);
+                        div.setAttribute('data-name', customer.name);
+                        div.setAttribute('data-address', customer.address || '');
+                        div.setAttribute('data-phone', customer.phoneNumber || '');
+
+                        div.addEventListener('click', function() {
+                            document.getElementById('customerSearch').value = customer.name;
+                            document.getElementById('customerId').value = customer.customerID;
+                            document.getElementById('customerName').value = customer.name;
+                            document.getElementById('customerAddress').value = customer.address || '';
+                            document.getElementById('customerPhone').value = customer.phoneNumber || '';
+
+                            customerTypeIndicator.innerHTML = '<i class="bi bi-check-circle"></i> Existing Customer';
+                            customerTypeIndicator.className = 'new-customer-notice mt-1 text-success';
+                            customerTypeIndicator.classList.remove('d-none');
+
+                            suggestions.classList.add('d-none');
+                            clearCustomerError();
+                        });
+
+                        suggestions.appendChild(div);
+                    });
+
+                    const newCustomerDiv = document.createElement('div');
+                    newCustomerDiv.className = 'autocomplete-suggestion';
+                    newCustomerDiv.innerHTML = `
+                        <strong>"${searchTerm}"</strong> - Create New Customer
+                        <span class="customer-type-indicator new-customer">New</span>
+                    `;
+                    newCustomerDiv.style.backgroundColor = '#f8fff8';
+
+                    newCustomerDiv.addEventListener('click', function() {
+                        document.getElementById('customerSearch').value = searchTerm;
+                        document.getElementById('customerId').value = '0';
+                        document.getElementById('customerName').value = searchTerm;
+                        document.getElementById('customerAddress').value = '';
+                        document.getElementById('customerPhone').value = '';
+
+                        customerTypeIndicator.innerHTML = '<i class="bi bi-plus-circle"></i> New Customer - Fill address and phone if needed';
+                        customerTypeIndicator.className = 'new-customer-notice mt-1 text-primary';
+                        customerTypeIndicator.classList.remove('d-none');
+
+                        suggestions.classList.add('d-none');
+                        clearCustomerError();
+                        document.getElementById('customerAddress').focus();
+                    });
+
+                    suggestions.appendChild(newCustomerDiv);
+                    suggestions.classList.remove('d-none');
+                } else {
+                    const newCustomerDiv = document.createElement('div');
+                    newCustomerDiv.className = 'autocomplete-suggestion';
+                    newCustomerDiv.innerHTML = `
+                        <strong>"${searchTerm}"</strong> - Create New Customer
+                        <span class="customer-type-indicator new-customer">New</span>
+                    `;
+                    newCustomerDiv.style.backgroundColor = '#f8fff8';
+
+                    newCustomerDiv.addEventListener('click', function() {
+                        document.getElementById('customerSearch').value = searchTerm;
+                        document.getElementById('customerId').value = '0';
+                        document.getElementById('customerName').value = searchTerm;
+                        document.getElementById('customerAddress').value = '';
+                        document.getElementById('customerPhone').value = '';
+
+                        customerTypeIndicator.innerHTML = '<i class="bi bi-plus-circle"></i> New Customer - Fill address and phone if needed';
+                        customerTypeIndicator.className = 'new-customer-notice mt-1 text-primary';
+                        customerTypeIndicator.classList.remove('d-none');
+
+                        suggestions.classList.add('d-none');
+                        clearCustomerError();
+                        document.getElementById('customerAddress').focus();
+                    });
+
+                    suggestions.appendChild(newCustomerDiv);
+                    suggestions.classList.remove('d-none');
+                }
+            }, 300);
+        });
+
+        // Clear customer error
+        function clearCustomerError() {
+            document.getElementById('customerError').textContent = '';
+        }
+
+        // Allow manual entry for new customers
+        document.getElementById('customerSearch').addEventListener('blur', function() {
+            const searchTerm = this.value.trim();
+            const customerId = document.getElementById('customerId').value;
+            const customerTypeIndicator = document.getElementById('customerTypeIndicator');
+
+            if (searchTerm && !customerId) {
+                document.getElementById('customerId').value = '0';
+                document.getElementById('customerName').value = searchTerm;
+
+                customerTypeIndicator.innerHTML = '<i class="bi bi-plus-circle"></i> New Customer - Fill address and phone if needed';
+                customerTypeIndicator.className = 'new-customer-notice mt-1 text-primary';
+                customerTypeIndicator.classList.remove('d-none');
+                clearCustomerError();
+            }
+        });
+
+        // Clear customer type indicator when search is cleared
+        document.getElementById('customerSearch').addEventListener('change', function() {
+            if (!this.value.trim()) {
+                document.getElementById('customerTypeIndicator').classList.add('d-none');
+                document.getElementById('customerId').value = '';
+                document.getElementById('customerName').value = '';
+            }
+        });
+
+        // Representative selection
+        document.getElementById('representativeSelect').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.value) {
+                document.getElementById('representativeName').value = selectedOption.getAttribute('data-name') || '';
+            } else {
+                document.getElementById('representativeName').value = '';
+            }
+        });
+
+        // Medicine search with autocomplete
+        let medicineSearchTimeout;
+        document.getElementById('medicineSearch').addEventListener('input', function() {
+            clearTimeout(medicineSearchTimeout);
+            medicineSearchTimeout = setTimeout(() => {
+                const searchTerm = this.value.trim();
+                if (searchTerm.length < 2) {
+                    document.getElementById('medicineSuggestions').classList.add('d-none');
+                    return;
+                }
+
+                fetch(`?handler=SearchMedicines&searchTerm=${encodeURIComponent(searchTerm)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const suggestions = document.getElementById('medicineSuggestions');
+                        suggestions.innerHTML = '';
+
+                        if (data.length > 0) {
+                            data.forEach(medicine => {
+                                const div = document.createElement('div');
+                                div.className = 'autocomplete-suggestion';
+                                div.textContent = `${medicine.name} (ID:${medicine.code})`;
+                                div.setAttribute('data-id', medicine.medicineId);
+                                div.setAttribute('data-name', medicine.name);
+                                div.setAttribute('data-code', medicine.code);
+
+                                div.addEventListener('click', function() {
+                                    document.getElementById('medicineSearch').value = medicine.name;
+                                    document.getElementById('selectedMedicineId').value = medicine.medicineId;
+                                    suggestions.classList.add('d-none');
+                                    clearMedicineError();
+
+                                    loadBatches(medicine.medicineId);
+                                });
+
+                                suggestions.appendChild(div);
+                            });
+                            suggestions.classList.remove('d-none');
+                        } else {
+                            suggestions.classList.add('d-none');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error searching medicines:', error);
+                        document.getElementById('medicineSuggestions').classList.add('d-none');
+                    });
+            }, 300);
+        });
+
+        // Clear medicine error
+        function clearMedicineError() {
+            document.getElementById('medicineError').textContent = '';
+        }
+
+        // Load batches for selected medicine
+        let currentBatches = [];
+        function loadBatches(medicineId) {
+            fetch(`?handler=GetBatchesByMedicine&medicineId=${medicineId}`)
+                .then(response => response.json())
+                .then(data => {
+                    currentBatches = data;
+                    document.getElementById('stockDisplay').textContent = `Stock: 0`;
+                    document.getElementById('batchDisplay').textContent = `Batch: 0`;
+                    resetItemFields();
+                })
+                .catch(error => {
+                    console.error('Error loading batches:', error);
+                    currentBatches = [];
+                });
+        }
+
+        // Batch search functionality - improved
+        let batchSearchTimeout;
+        document.getElementById('batchSearch').addEventListener('input', function() {
+            clearTimeout(batchSearchTimeout);
+            batchSearchTimeout = setTimeout(() => {
+                const searchTerm = this.value.trim();
+                const resultsContainer = document.getElementById('batchSearchResults');
+
+                if (searchTerm.length === 0) {
+                    resultsContainer.style.display = 'none';
+                    resultsContainer.innerHTML = '';
+                    return;
+                }
+
+                if (currentBatches.length === 0) {
+                    resultsContainer.innerHTML = '<div class="batch-search-result">No medicine selected</div>';
+                    resultsContainer.style.display = 'block';
+                    return;
+                }
+
+                const filteredBatches = currentBatches.filter(batch =>
+                    batch.batchNumber.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+
+                resultsContainer.innerHTML = '';
+
+                if (filteredBatches.length > 0) {
+                    filteredBatches.forEach(batch => {
+                        const div = document.createElement('div');
+                        div.className = 'batch-search-result';
+
+                        const stockInfo = batch.stockQuantity > 0 ?
+                            `<span class="batch-stock-info">Stock: ${batch.stockQuantity}</span>` :
+                            '<span class="batch-stock-info text-danger">Out of Stock</span>';
+
+                        const expiryInfo = batch.expDate ?
+                            `<span class="batch-expiry-info">Exp: ${batch.expDate}</span>` : '';
+
+                        const priceInfo = batch.unitPrice ?
+                            `<span class="batch-price-info">Price: Rs. ${parseFloat(batch.unitPrice).toFixed(2)}</span>` : '';
+
+                        div.innerHTML = `
+                            <div><strong>${batch.batchNumber}</strong> ${stockInfo}</div>
+                            ${expiryInfo}
+                            ${priceInfo}
+                        `;
+
+                        div.setAttribute('data-batch-id', batch.batchId);
+                        div.setAttribute('data-batch-number', batch.batchNumber);
+                        div.setAttribute('data-stock', batch.stockQuantity);
+                        div.setAttribute('data-price', batch.unitPrice);
+                        div.setAttribute('data-mfg', batch.mfgDate);
+                        div.setAttribute('data-exp', batch.expDate);
+
+                        div.addEventListener('click', function() {
+                            document.getElementById('batchSearch').value = batch.batchNumber;
+                            document.getElementById('selectedBatchId').value = batch.batchId;
+
+                            const stock = parseInt(batch.stockQuantity);
+                            const price = parseFloat(batch.unitPrice);
+                            const batchNumber = batch.batchNumber;
+
+                            document.getElementById('stockDisplay').textContent = `Stock: ${stock}`;
+                            document.getElementById('batchDisplay').textContent = `Batch: ${batchNumber}`;
+                            document.getElementById('unitPrice').value = price.toFixed(2);
+                            document.getElementById('quantity').max = stock;
+
+                            calculateLineTotal();
+                            resultsContainer.style.display = 'none';
+                            clearBatchError();
+                        });
+
+                        resultsContainer.appendChild(div);
+                    });
+                    resultsContainer.style.display = 'block';
+                } else {
+                    resultsContainer.innerHTML = '<div class="batch-search-result">No batches found</div>';
+                    resultsContainer.style.display = 'block';
+                }
+            }, 300);
+        });
+
+        // Clear batch error
+        function clearBatchError() {
+            document.getElementById('batchError').textContent = '';
+        }
+
+        // Hide batch search results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.batch-search-container')) {
+                document.getElementById('batchSearchResults').style.display = 'none';
+            }
+        });
+
+        // Unit price editing
+        document.getElementById('unitPrice').addEventListener('input', function() {
+            calculateLineTotal();
+            clearPriceError();
+        });
+
+        // Clear price error
+        function clearPriceError() {
+            document.getElementById('priceError').textContent = '';
+        }
+
+        // Quantity, free qty, and discount changes
+        document.getElementById('quantity').addEventListener('input', function() {
+            calculateLineTotal();
+            clearQuantityError();
+        });
+
+        document.getElementById('freeQty').addEventListener('input', calculateLineTotal);
+        document.getElementById('discountPercent').addEventListener('input', calculateLineTotal);
+
+        // Clear quantity error
+        function clearQuantityError() {
+            document.getElementById('quantityError').textContent = '';
+        }
+
+        function calculateLineTotal() {
+            const quantity = parseInt(document.getElementById('quantity').value) || 0;
+            const unitPrice = parseFloat(document.getElementById('unitPrice').value) || 0;
+            const discountPercent = parseFloat(document.getElementById('discountPercent').value) || 0;
+
+            const amount = unitPrice * quantity;
+            const discountValue = amount * (discountPercent / 100);
+            const netAmount = amount - discountValue;
+
+            document.getElementById('amount').value = amount.toFixed(2);
+            document.getElementById('discountValue').value = discountValue.toFixed(2);
+        }
+
+        function resetItemFields() {
+            document.getElementById('batchSearch').value = '';
+            document.getElementById('selectedBatchId').value = '';
+            document.getElementById('unitPrice').value = '';
+            document.getElementById('quantity').value = '1';
+            document.getElementById('freeQty').value = '0';
+            document.getElementById('amount').value = '';
+            document.getElementById('discountPercent').value = '0';
+            document.getElementById('discountValue').value = '';
+            document.getElementById('quantity').max = '';
+            document.getElementById('batchSearchResults').style.display = 'none';
+            document.getElementById('batchSearchResults').innerHTML = '';
+
+            // Clear errors
+            clearBatchError();
+            clearPriceError();
+            clearQuantityError();
+        }
+
+        // Add item to invoice
+        document.getElementById('addItemBtn').addEventListener('click', function() {
+            const medicineId = document.getElementById('selectedMedicineId').value;
+            const medicineName = document.getElementById('medicineSearch').value;
+            const batchId = document.getElementById('selectedBatchId').value;
+            const batchNumber = document.getElementById('batchSearch').value;
+
+            // Validation
+            let isValid = true;
+
+            if (!medicineId || !medicineName) {
+                document.getElementById('medicineError').textContent = 'Please select a medicine';
+                isValid = false;
+            }
+
+            if (!batchId || !batchNumber) {
+                document.getElementById('batchError').textContent = 'Please select a batch';
+                isValid = false;
+            }
+
+            if (!isValid) {
+                return;
+            }
+
+            const selectedBatch = currentBatches.find(b => b.batchId == batchId);
+            if (!selectedBatch) {
+                document.getElementById('batchError').textContent = 'Selected batch not found';
+                return;
+            }
+
+            const quantity = parseInt(document.getElementById('quantity').value) || 0;
+            const freeQty = parseInt(document.getElementById('freeQty').value) || 0;
+            const stock = parseInt(selectedBatch.stockQuantity);
+
+            if (quantity > stock) {
+                document.getElementById('quantityError').textContent = `Quantity exceeds available stock. Available: ${stock}`;
+                return;
+            }
+
+            if (quantity <= 0) {
+                document.getElementById('quantityError').textContent = 'Please enter valid quantity';
+                return;
+            }
+
+            const unitPrice = parseFloat(document.getElementById('unitPrice').value) || 0;
+            if (unitPrice <= 0) {
+                document.getElementById('priceError').textContent = 'Please enter valid unit price';
+                return;
+            }
+
+            const amount = parseFloat(document.getElementById('amount').value) || 0;
+            const discountPercent = parseFloat(document.getElementById('discountPercent').value) || 0;
+            const discountValue = parseFloat(document.getElementById('discountValue').value) || 0;
+            const netAmount = amount - discountValue;
+
+            // Get medicine code for display
+            const medicineCode = document.querySelector(`.autocomplete-suggestion[data-id="${medicineId}"]`)?.getAttribute('data-code') || medicineId;
+
+            // Add item to table
+            addItemToTable({
+                medicineId: medicineId,
+                medicineName: medicineName,
+                code: medicineCode,
+                batchId: batchId,
+                batchNumber: batchNumber,
+                mfgDate: selectedBatch.mfgDate,
+                expDate: selectedBatch.expDate,
+                quantity: quantity,
+                freeQty: freeQty,
+                unitPrice: unitPrice,
+                amount: amount,
+                discountPercent: discountPercent,
+                discountValue: discountValue,
+                netAmount: netAmount
+            });
+
+            // Reset form
+            document.getElementById('medicineSearch').value = '';
+            document.getElementById('selectedMedicineId').value = '';
+            resetItemFields();
+            document.getElementById('stockDisplay').textContent = 'Stock: 0';
+            document.getElementById('batchDisplay').textContent = 'Batch: 0';
+            currentBatches = [];
+
+            // Clear errors
+            clearMedicineError();
+        });
+
+        function addItemToTable(item) {
+            const noItemsRow = document.getElementById('noItemsRow');
+            if (noItemsRow) {
+                noItemsRow.remove();
+            }
+
+            const tbody = document.getElementById('invoiceItemsBody');
+            const hiddenContainer = document.getElementById('hiddenItemsContainer');
+
+            // Create table row
+            const tr = document.createElement('tr');
+            tr.className = 'item-row';
+            tr.innerHTML = `
+                <td>${item.code}</td>
+                <td>${item.medicineName}</td>
+                <td>${item.batchNumber}</td>
+                <td>${item.mfgDate}</td>
+                <td>${item.expDate}</td>
+                <td>${item.quantity}</td>
+                <td>${item.freeQty}</td>
+                <td>${item.unitPrice.toFixed(2)}</td>
+                <td>${item.amount.toFixed(2)}</td>
+                <td>${item.discountPercent.toFixed(2)}</td>
+                <td>${item.discountValue.toFixed(2)}</td>
+                <td>${item.netAmount.toFixed(2)}</td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm remove-item">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+
+            // Store item data in data attributes
+            tr.setAttribute('data-medicine-id', item.medicineId);
+            tr.setAttribute('data-batch-id', item.batchId);
+
+            // Create hidden fields for form binding
+            const index = itemCounter;
+            const hiddenFields = document.createElement('div');
+            hiddenFields.className = 'item-fields';
+            hiddenFields.setAttribute('data-index', index);
+            hiddenFields.innerHTML = `
+                <input type="hidden" name="InvoiceItems[${index}].MedicineId" value="${item.medicineId}" />
+                <input type="hidden" name="InvoiceItems[${index}].MedicineName" value="${item.medicineName}" />
+                <input type="hidden" name="InvoiceItems[${index}].Code" value="${item.code}" />
+                <input type="hidden" name="InvoiceItems[${index}].BatchId" value="${item.batchId}" />
+                <input type="hidden" name="InvoiceItems[${index}].BatchNumber" value="${item.batchNumber}" />
+                <input type="hidden" name="InvoiceItems[${index}].MfgDate" value="${item.mfgDate}" />
+                <input type="hidden" name="InvoiceItems[${index}].ExpDate" value="${item.expDate}" />
+                <input type="hidden" name="InvoiceItems[${index}].Quantity" value="${item.quantity}" />
+                <input type="hidden" name="InvoiceItems[${index}].FreeQty" value="${item.freeQty}" />
+                <input type="hidden" name="InvoiceItems[${index}].UnitPrice" value="${item.unitPrice}" />
+                <input type="hidden" name="InvoiceItems[${index}].Amount" value="${item.amount}" />
+                <input type="hidden" name="InvoiceItems[${index}].DiscountPercent" value="${item.discountPercent}" />
+                <input type="hidden" name="InvoiceItems[${index}].DiscountValue" value="${item.discountValue}" />
+                <input type="hidden" name="InvoiceItems[${index}].NetAmount" value="${item.netAmount}" />
+            `;
+
+            hiddenContainer.appendChild(hiddenFields);
+
+            // Add remove event listener
+            tr.querySelector('.remove-item').addEventListener('click', function() {
+                const itemIndex = index;
+
+                // Remove table row
+                tr.remove();
+
+                // Remove hidden fields for this specific item
+                const itemFields = hiddenContainer.querySelector(`.item-fields[data-index="${itemIndex}"]`);
+                if (itemFields) {
+                    itemFields.remove();
+                }
+
+                // Reindex all remaining items
+                reindexItems();
+
+                updateTotals();
+                if (tbody.children.length === 0) {
+                    tbody.innerHTML = '<tr id="noItemsRow"><td colspan="13" class="text-muted text-center">No items added</td></tr>';
+                }
+            });
+
+            tbody.appendChild(tr);
+            itemCounter++;
+            updateTotals();
+        }
+
+        // Improved reindex function
+        function reindexItems() {
+            const rows = document.querySelectorAll('#invoiceItemsBody tr.item-row');
+            const hiddenContainer = document.getElementById('hiddenItemsContainer');
+
+            // Clear all existing hidden fields
+            const allItemFields = hiddenContainer.querySelectorAll('.item-fields');
+            allItemFields.forEach(field => field.remove());
+
+            // Recreate hidden fields with new sequential indexes
+            rows.forEach((row, newIndex) => {
+                const cells = row.cells;
+
+                const hiddenFields = document.createElement('div');
+                hiddenFields.className = 'item-fields';
+                hiddenFields.setAttribute('data-index', newIndex);
+
+                hiddenFields.innerHTML = `
+                    <input type="hidden" name="InvoiceItems[${newIndex}].MedicineId" value="${row.getAttribute('data-medicine-id')}" />
+                    <input type="hidden" name="InvoiceItems[${newIndex}].MedicineName" value="${cells[1].textContent}" />
+                    <input type="hidden" name="InvoiceItems[${newIndex}].Code" value="${cells[0].textContent}" />
+                    <input type="hidden" name="InvoiceItems[${newIndex}].BatchId" value="${row.getAttribute('data-batch-id')}" />
+                    <input type="hidden" name="InvoiceItems[${newIndex}].BatchNumber" value="${cells[2].textContent}" />
+                    <input type="hidden" name="InvoiceItems[${newIndex}].MfgDate" value="${cells[3].textContent}" />
+                    <input type="hidden" name="InvoiceItems[${newIndex}].ExpDate" value="${cells[4].textContent}" />
+                    <input type="hidden" name="InvoiceItems[${newIndex}].Quantity" value="${cells[5].textContent}" />
+                    <input type="hidden" name="InvoiceItems[${newIndex}].FreeQty" value="${cells[6].textContent}" />
+                    <input type="hidden" name="InvoiceItems[${newIndex}].UnitPrice" value="${cells[7].textContent}" />
+                    <input type="hidden" name="InvoiceItems[${newIndex}].Amount" value="${cells[8].textContent}" />
+                    <input type="hidden" name="InvoiceItems[${newIndex}].DiscountPercent" value="${cells[9].textContent}" />
+                    <input type="hidden" name="InvoiceItems[${newIndex}].DiscountValue" value="${cells[10].textContent}" />
+                    <input type="hidden" name="InvoiceItems[${newIndex}].NetAmount" value="${cells[11].textContent}" />
+                `;
+
+                hiddenContainer.appendChild(hiddenFields);
+            });
+
+            itemCounter = rows.length;
+        }
+
+        // VAT calculation function
+        function calculateVAT(grossValue, discountValue, vatPercentage) {
+            const vatGrossValue = grossValue - discountValue;
+            const vatValue = vatGrossValue * (vatPercentage / 100);
+            return vatValue;
+        }
+
+        function updateTotals() {
+            let grossValue = 0;
+            let totalDiscount = 0;
+
+            document.querySelectorAll('#invoiceItemsBody tr.item-row').forEach(row => {
+                const cells = row.cells;
+                grossValue += parseFloat(cells[8].textContent) || 0;
+                totalDiscount += parseFloat(cells[10].textContent) || 0;
+            });
+
+            // VAT calculation
+            const vatPercentage = parseFloat(document.getElementById('vatPercentage').value) || 0;
+            const vatValue = calculateVAT(grossValue, totalDiscount, vatPercentage);
+
+            const addValue = parseFloat(document.getElementById('addValue').value) || 0;
+            const lessValue = parseFloat(document.getElementById('lessValue').value) || 0;
+
+            // Net value calculation with VAT
+            const netValue = grossValue - totalDiscount + vatValue + addValue - lessValue;
+
+            document.getElementById('grossValue').textContent = grossValue.toFixed(2);
+            document.getElementById('totalDiscount').textContent = totalDiscount.toFixed(2);
+            document.getElementById('vatValue').textContent = vatValue.toFixed(2);
+            document.getElementById('netValue').textContent = netValue.toFixed(2);
+
+            document.getElementById('inputGrossValue').value = grossValue;
+            document.getElementById('inputDiscountValue').value = totalDiscount;
+            document.getElementById('inputVATValue').value = vatValue;
+            document.getElementById('inputNetValue').value = netValue;
+            document.getElementById('inputVATPercentage').value = vatPercentage;
+        }
+
+        document.getElementById('vatPercentage').addEventListener('input', updateTotals);
+        document.getElementById('addValue').addEventListener('input', updateTotals);
+        document.getElementById('lessValue').addEventListener('input', updateTotals);
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#customerSearch') && !e.target.closest('#customerSuggestions')) {
+                document.getElementById('customerSuggestions').classList.add('d-none');
+            }
+            if (!e.target.closest('#medicineSearch') && !e.target.closest('#medicineSuggestions')) {
+                document.getElementById('medicineSuggestions').classList.add('d-none');
+            }
+        });
+
+        // Form validation before submit
+        function validateFormBeforeSubmit() {
+            let isValid = true;
+
+            // Validate customer
+            const customerName = document.getElementById('customerName').value;
+            const customerSearch = document.getElementById('customerSearch').value;
+            if (!customerName && !customerSearch) {
+                document.getElementById('customerError').textContent = 'Please select or enter a customer name';
+                isValid = false;
+            } else {
+                // If customer name is not set but search field has value, set it
+                if (!customerName && customerSearch) {
+                    document.getElementById('customerId').value = '0';
+                    document.getElementById('customerName').value = customerSearch;
+                }
+            }
+
+            // Validate items
+            const itemRows = document.querySelectorAll('#invoiceItemsBody tr.item-row');
+            if (itemRows.length === 0) {
+                alert('Please add at least one item to the invoice');
+                isValid = false;
+            }
+
+            // Validate invoice type for credit sales
+            const invoiceType = document.getElementById('invoiceType').value;
+            if (invoiceType === 'Credit Invoice') {
+                if (!confirm('This is a Credit Invoice. Are you sure you want to proceed?')) {
+                    isValid = false;
+                }
+            }
+
+            return isValid;
+        }
+
+        // Form submission handler
+        document.getElementById('invoiceForm').addEventListener('submit', function(e) {
+            // If this is the SaveInvoice handler
+            const saveBtn = document.getElementById('saveBtn');
+            if (e.submitter === saveBtn) {
+                if (!validateFormBeforeSubmit()) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Disable save button to prevent double submission
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+            }
+        });
+
+        // Initialize remove event listeners for existing items
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add remove event listeners to existing items
+            document.querySelectorAll('#invoiceItemsBody .remove-item').forEach(button => {
+                button.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const hiddenContainer = document.getElementById('hiddenItemsContainer');
+
+                    // Remove table row
+                    row.remove();
+
+                    // Remove all hidden fields and recreate with proper indexing
+                    reindexItems();
+
+                    updateTotals();
+                    const tbody = document.getElementById('invoiceItemsBody');
+                    if (tbody.children.length === 0) {
+                        tbody.innerHTML = '<tr id="noItemsRow"><td colspan="13" class="text-muted text-center">No items added</td></tr>';
+                    }
+                });
+            });
+
+            updateTotals();
+        });
+
+        // Handle clear form
+        document.querySelector('button[asp-page-handler="Clear"]').addEventListener('click', function(e) {
+            if (!confirm('Are you sure you want to clear the form? All unsaved data will be lost.')) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

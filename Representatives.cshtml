@@ -1,0 +1,285 @@
+﻿@page
+@model PHARMACY.Pages.Billing.RepresentativesModel
+@{
+    ViewData["Title"] = "Manage Representatives";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Manage Representatives</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+
+        h3 {
+            color: #007bff;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .table thead {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-group {
+            margin-bottom: 20px;
+        }
+
+        .status-active {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-inactive {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .field-validation-error {
+            color: #dc3545;
+            font-size: 0.875em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3><i class="bi bi-people-fill"></i> Manage Representatives</h3>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRepresentativeModal">
+                <i class="bi bi-person-plus"></i> Add New Representative
+            </button>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Add validation summary -->
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Contact Number</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Created Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Representatives.Any())
+                    {
+                        @foreach (var rep in Model.Representatives)
+                        {
+                            <tr>
+                                <td>@rep.Code</td>
+                                <td>@rep.RepresentativeName</td>
+                                <td>@rep.ContactNumber</td>
+                                <td>@rep.Email</td>
+                                <td>
+                                    @if (rep.IsActive)
+                                    {
+                                        <span class="status-active">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-inactive">Inactive</span>
+                                    }
+                                </td>
+                                <td>@rep.CreatedDate.ToString("yyyy-MM-dd")</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-warning btn-edit"
+                                                data-id="@rep.RepresentativeId"
+                                                data-name="@rep.RepresentativeName"
+                                                data-code="@rep.Code"
+                                                data-contact="@rep.ContactNumber"
+                                                data-email="@rep.Email"
+                                                data-active="@rep.IsActive">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        @if (rep.IsActive)
+                                        {
+                                            <button type="button" class="btn btn-danger btn-deactivate" data-id="@rep.RepresentativeId">
+                                                <i class="bi bi-person-dash"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-success btn-activate" data-id="@rep.RepresentativeId">
+                                                <i class="bi bi-person-check"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No representatives found</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Representative Modal -->
+    <div class="modal fade" id="addRepresentativeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Add New Representative</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="post" id="representativeForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="representativeId" asp-for="Representative.RepresentativeId" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Representative Name *</label>
+                            <input type="text" class="form-control" id="representativeName" asp-for="Representative.RepresentativeName" required>
+                            <span asp-validation-for="Representative.RepresentativeName" class="field-validation-error"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Code *</label>
+                            <input type="text" class="form-control" id="code" asp-for="Representative.Code" required>
+                            <span asp-validation-for="Representative.Code" class="field-validation-error"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Contact Number</label>
+                            <input type="text" class="form-control" id="contactNumber" asp-for="Representative.ContactNumber">
+                            <span asp-validation-for="Representative.ContactNumber" class="field-validation-error"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" asp-for="Representative.Email">
+                            <span asp-validation-for="Representative.Email" class="field-validation-error"></span>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="isActive" asp-for="Representative.IsActive">
+                            <label class="form-check-label" for="isActive">Active</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Representative</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Edit representative
+        document.querySelectorAll('.btn-edit').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const name = this.getAttribute('data-name');
+                const code = this.getAttribute('data-code');
+                const contact = this.getAttribute('data-contact');
+                const email = this.getAttribute('data-email');
+                const active = this.getAttribute('data-active') === 'True';
+
+                document.getElementById('representativeId').value = id;
+                document.getElementById('representativeName').value = name;
+                document.getElementById('code').value = code;
+                document.getElementById('contactNumber').value = contact;
+                document.getElementById('email').value = email;
+                document.getElementById('isActive').checked = active;
+                document.getElementById('modalTitle').textContent = 'Edit Representative';
+
+                const modal = new bootstrap.Modal(document.getElementById('addRepresentativeModal'));
+                modal.show();
+            });
+        });
+
+        // Clear form when modal is hidden
+        document.getElementById('addRepresentativeModal').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('representativeForm').reset();
+            document.getElementById('representativeId').value = '';
+            document.getElementById('modalTitle').textContent = 'Add New Representative';
+
+            // Clear validation errors
+            document.querySelectorAll('.field-validation-error').forEach(span => {
+                span.textContent = '';
+            });
+        });
+
+        // Activate/Deactivate representatives
+        document.querySelectorAll('.btn-deactivate').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                if (confirm('Are you sure you want to deactivate this representative?')) {
+                    window.location.href = `?handler=Deactivate&id=${id}`;
+                }
+            });
+        });
+
+        document.querySelectorAll('.btn-activate').forEach(button => {
+            button.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                if (confirm('Are you sure you want to activate this representative?')) {
+                    window.location.href = `?handler=Activate&id=${id}`;
+                }
+            });
+        });
+
+        // Form validation
+        document.getElementById('representativeForm').addEventListener('submit', function(e) {
+            const name = document.getElementById('representativeName').value.trim();
+            const code = document.getElementById('code').value.trim();
+
+            if (!name) {
+                e.preventDefault();
+                alert('Please enter representative name');
+                return;
+            }
+
+            if (!code) {
+                e.preventDefault();
+                alert('Please enter code');
+                return;
+            }
+        });
+    </script>
+</body>
+</html>

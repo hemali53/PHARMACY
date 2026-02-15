@@ -1,0 +1,354 @@
+﻿@page "/Billing/PrintInvoice/{id:int}"
+@model PHARMACY.Pages.Billing.PrintInvoiceModel
+@{
+    ViewData["Title"] = "Print Invoice";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Invoice @Model.Invoice?.InvoiceNumber</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: white;
+            color: black;
+        }
+
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 2px solid #333;
+        }
+
+        .invoice-header {
+            border-bottom: 3px double #333;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .company-info {
+            text-align: center;
+        }
+
+        .company-name {
+            font-size: 28px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+
+        .company-address {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .invoice-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-transform: uppercase;
+        }
+
+        .invoice-details {
+            margin-bottom: 20px;
+        }
+
+            .invoice-details table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .invoice-details td {
+                padding: 5px;
+                vertical-align: top;
+            }
+
+            .invoice-details .label {
+                font-weight: bold;
+                width: 30%;
+            }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+            .items-table th {
+                background-color: #f8f9fa;
+                border: 1px solid #dee2e6;
+                padding: 8px;
+                text-align: center;
+                font-weight: bold;
+            }
+
+            .items-table td {
+                border: 1px solid #dee2e6;
+                padding: 8px;
+                text-align: center;
+            }
+
+        .summary-table {
+            width: 50%;
+            margin-left: auto;
+            border-collapse: collapse;
+        }
+
+            .summary-table td {
+                padding: 8px;
+                border: 1px solid #dee2e6;
+            }
+
+            .summary-table .label {
+                font-weight: bold;
+                text-align: right;
+            }
+
+        .total-row {
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+
+        .signature-area {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .signature-box {
+            text-align: center;
+            width: 200px;
+            border-top: 1px solid #333;
+            padding-top: 10px;
+        }
+
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .watermark {
+            position: fixed;
+            opacity: 0.1;
+            font-size: 80px;
+            color: #ccc;
+            transform: rotate(-45deg);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            white-space: nowrap;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    @if (Model.Invoice == null)
+    {
+        <div class="container mt-5">
+            <div class="alert alert-danger">
+                <h4>Invoice Not Found</h4>
+                <p>The requested invoice could not be found.</p>
+                <a href="/Billing/CustomerInvoice" class="btn btn-primary">Back to Invoice</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="watermark">@Model.Invoice.InvoiceNumber</div>
+
+        <div class="container">
+            <div class="invoice-container">
+                <!-- Header -->
+                <div class="invoice-header">
+                    <div class="company-info">
+                        <div class="company-name">PHARMACY STORE</div>
+                        <div class="company-address">
+                            123 Main Street, Colombo 05<br />
+                            Phone: 011-1234567 | Email: info@pharmacystore.com<br />
+                            VAT No: 123456789V
+                        </div>
+                    </div>
+
+                    <div class="invoice-title">
+                        @Model.Invoice.InvoiceType.ToUpper()
+                    </div>
+                </div>
+
+                <!-- Invoice Details -->
+                <div class="invoice-details">
+                    <table>
+                        <tr>
+                            <td class="label">Invoice No:</td>
+                            <td>@Model.Invoice.InvoiceNumber</td>
+                            <td class="label">Date:</td>
+                            <td>@Model.Invoice.InvoiceDate.ToString("yyyy-MM-dd")</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Customer Name:</td>
+                            <td>@Model.Invoice.CustomerName</td>
+                            <td class="label">Phone:</td>
+                            <td>@Model.Invoice.CustomerPhone</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Address:</td>
+                            <td colspan="3">@Model.Invoice.CustomerAddress</td>
+                        </tr>
+                        @if (!string.IsNullOrEmpty(Model.Invoice.PONumber))
+                        {
+                            <tr>
+                                <td class="label">PO Number:</td>
+                                <td>@Model.Invoice.PONumber</td>
+                                <td class="label">Representative:</td>
+                                <td>@Model.Invoice.RepresentativeName</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+
+                <!-- Items Table -->
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Medicine Name</th>
+                            <th>Batch No</th>
+                            <th>EXP Date</th>
+                            <th>Qty</th>
+                            <th>Free</th>
+                            <th>Unit Price</th>
+                            <th>Amount</th>
+                            <th>Dis %</th>
+                            <th>Dis Value</th>
+                            <th>Net Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.InvoiceItems.Count; i++)
+                        {
+                            var item = Model.InvoiceItems[i];
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td>@item.MedicineName</td>
+                                <td>@item.BatchNumber</td>
+                                <td>@item.ExpDate.ToString("yyyy-MM-dd")</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.FreeQty</td>
+                                <td>@item.UnitPrice.ToString("N2")</td>
+                                <td>@item.Amount.ToString("N2")</td>
+                                <td>@item.DiscountPercent.ToString("N2")</td>
+                                <td>@item.DiscountValue.ToString("N2")</td>
+                                <td>@item.NetAmount.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <!-- Summary -->
+                <table class="summary-table">
+                    <tr>
+                        <td class="label">Gross Value:</td>
+                        <td>@Model.Invoice.GrossValue.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Discount:</td>
+                        <td>@Model.Invoice.DiscountValue.ToString("N2")</td>
+                    </tr>
+                    <tr>
+                        <td class="label">VAT (@Model.Invoice.VATPercentage%):</td>
+                        <td>@Model.Invoice.VATValue.ToString("N2")</td>
+                    </tr>
+                    @if (Model.Invoice.AddValue > 0)
+                    {
+                        <tr>
+                            <td class="label">Add Value:</td>
+                            <td>@Model.Invoice.AddValue.ToString("N2")</td>
+                        </tr>
+                    }
+                    @if (Model.Invoice.LessValue > 0)
+                    {
+                        <tr>
+                            <td class="label">Less Value:</td>
+                            <td>@Model.Invoice.LessValue.ToString("N2")</td>
+                        </tr>
+                    }
+                    <tr class="total-row">
+                        <td class="label">Net Value:</td>
+                        <td>@Model.Invoice.NetValue.ToString("N2")</td>
+                    </tr>
+                </table>
+
+                <!-- Note -->
+                @if (!string.IsNullOrEmpty(Model.Invoice.Note))
+                {
+                    <div style="margin-top: 20px;">
+                        <strong>Note:</strong> @Model.Invoice.Note
+                    </div>
+                }
+
+                <!-- Footer -->
+                <div class="footer">
+                    <div>Thank you for your business!</div>
+                    <div style="font-size: 12px; margin-top: 10px;">
+                        This is a computer generated invoice. No signature required.
+                    </div>
+
+                    <div class="signature-area">
+                        <div class="signature-box">
+                            Customer Signature<br />
+                            _________________
+                        </div>
+                        <div class="signature-box">
+                            Authorized Signature<br />
+                            _________________
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Print Button -->
+        <div class="no-print print-btn">
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="bi bi-printer"></i> Print Invoice
+            </button>
+            <button onclick="window.close()" class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i> Close
+            </button>
+        </div>
+
+        <!-- Auto print after loading -->
+        <script>
+            window.onload = function() {
+                // Auto print after 1 second
+                setTimeout(function() {
+                    window.print();
+                }, 1000);
+            };
+
+            // After print, close window or show message
+            window.onafterprint = function() {
+                // You can choose to close automatically or keep open
+                // window.close();
+            };
+        </script>
+    }
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
