@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PHARMACY</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/PHARMACY.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+    <style>
+        /* This CSS ensures the sidebar sticks to the left */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 1000; /* Overlap content */
+            padding-top: 56px; /* Space for a top bar if you add one later */
+        }
+        /* Style the actual list for a vertical layout */
+        .sidebar .navbar-nav {
+            display: block; /* Make the nav-items stack vertically */
+            flex-direction: column !important;
+            width: 100%;
+        }
+        .sidebar .nav-item {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <nav id="vertical-nav" class="col-md-3 col-lg-2 bg-dark sidebar">
+        <div class="position-sticky pt-3">
+            <a class="navbar-brand text-white d-block p-3 border-bottom" href="/">
+                @* <i class="fas fa-clinic-medical"></i>  *@
+                PHARMACY SYSTEM
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu"
+                    aria-expanded="true" aria-label="Toggle navigation" style="display: none;">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse d-md-block navbar-collapse" id="sidebarMenu">
+                <ul class="navbar-nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-white active" aria-current="page" href="/">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/Customer/Register">
+                            <i class="fas fa-user-plus"></i> Customer Registration
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/Billing/Representatives">
+                            <i class="fas fa-user-plus"></i> Manage Representatives
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-area="" asp-page="/Medicines/Index">
+                            <i class="fas fa-pills"></i> Medicines
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/Billing/CustomerInvoice">
+                            <i class="fas fa-receipt"></i> Billing
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/Inventory">
+                            <i class="fas fa-boxes"></i> Inventory
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/GRN">
+                            <i class="fas fa-boxes"></i> GRN
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/PRNcreate">
+                            <i class="fas fa-boxes"></i> PRN
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <main role="main" class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pb-3">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container-fluid">
+            &copy; 2024 - PHARMACY - <a asp-area="" asp-page="/Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
