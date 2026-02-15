@@ -1,0 +1,146 @@
+﻿@page
+@model PHARMACY.Pages.Inventory.LowStockModel
+@{
+    ViewData["Title"] = "Low Stock Items";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-primary"><i class="fas fa-exclamation-triangle"></i> Low Stock Items</h1>
+            <p class="lead text-muted">Items that need immediate attention and restocking</p>
+        </div>
+        <div>
+            <a href="/Inventory" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Inventory
+            </a>
+        </div>
+    </div>
+
+    @if (Model.LowStockItems.Any())
+    {
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">Low Stock Items</h4>
+                                <h2>@Model.LowStockItems.Count</h2>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-exclamation-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">Critical Items</h4>
+                                <h2>@Model.LowStockItems.Count(i => i.Difference >= 5)</h2>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-skull-crossbones fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 class="card-title">Total Shortage</h4>
+                                <h2>@Model.LowStockItems.Sum(i => i.Difference)</h2>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-calculator fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Table -->
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h5 class="card-title mb-0 text-white">
+                    <i class="fas fa-list"></i> Low Stock Items
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-warning">
+                            <tr>
+                                <th>Medicine Name</th>
+                                <th>Batch No</th>
+                                <th>Current Stock</th>
+                                <th>Minimum Stock</th>
+                                <th>Shortage</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.LowStockItems)
+                            {
+                                var isCritical = item.Difference >= 5;
+                                <tr>
+                                    <td>@item.MedicineName</td>
+                                    <td>@item.BatchNumber</td>
+                                    <td>@item.CurrentStock</td>
+                                    <td>@item.MinimumStock</td>
+                                    <td>
+                                        <span class="badge @(isCritical ? "bg-danger" : "bg-warning text-dark")">
+                                            @item.Difference units
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge @(isCritical ? "bg-danger" : "bg-warning text-dark")">
+                                            @(isCritical ? "CRITICAL" : "LOW")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="/Medicines" class="btn btn-sm btn-success">
+                                            <i class="fas fa-plus"></i> Restock
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Empty State -->
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                <h3 class="text-success">All Stock Levels Are Good!</h3>
+                <p class="text-muted">No low stock items found. All medicines are sufficiently stocked.</p>
+                <div class="mt-4">
+                    <a href="/Inventory" class="btn btn-primary me-2">
+                        <i class="fas fa-arrow-left"></i> Back to Inventory
+                    </a>
+                    <a href="/Medicines" class="btn btn-outline-primary">
+                        <i class="fas fa-pills"></i> View All Medicines
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">

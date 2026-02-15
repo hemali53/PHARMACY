@@ -1,86 +1,120 @@
 ﻿@page
-@model IndexModel
+@model PHARMACY.Pages.Inventory.IndexModel
 @{
-    ViewData["Title"] = "Pharmacy Dashboard";
+    ViewData["Title"] = "Inventory Dashboard";
     Layout = "_Layout";
 }
 
 <div class="container-fluid">
-    <!-- Header -->
-    <div class="row mb-4">
+    <div class="row">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="display-5 text-primary mb-1">🏥 Pharmacy Management System</h1>
-                    <p class="lead mb-0">Comprehensive Dashboard - @DateTime.Now.ToString("MMMM dd, yyyy")</p>
+            <h1 class="display-4 text-primary">📦 Inventory Management</h1>
+            <p class="lead">Manage your pharmacy stock and inventory efficiently</p>
+        </div>
+    </div>
+
+    <!-- Inventory Summary Cards -->
+    <div class="row mt-4">
+        <div class="col-md-3 mb-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">Total Items</h4>
+                            <h2>@Model.TotalItems</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-boxes fa-2x"></i>
+                        </div>
+                    </div>
                 </div>
-                <div class="text-end">
-                    <button class="btn btn-outline-primary" onclick="window.print()">
-                        <i class="fas fa-print me-2"></i>Print Report
-                    </button>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">Low Stock</h4>
+                            <h2>@Model.LowStockCount</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        </div>
+                    </div>
+                    <a href="/Inventory/LowStock" class="text-white">View Details</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card text-white bg-danger">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">Expiring Soon</h4>
+                            <h2>@Model.ExpiringSoonCount</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                    <a href="/Inventory/ExpiringSoon" class="text-white">Check Now</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">Out of Stock</h4>
+                            <h2>@Model.OutOfStockCount</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-times-circle fa-2x"></i>
+                        </div>
+                    </div>
+                    <a href="/Inventory/OutOfStock" class="text-white">Restock</a>
                 </div>
             </div>
         </div>
     </div>
-    </div>
-    <!-- Simple Sales Report -->
-    <div class="row mb-4">
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
         <div class="col-12">
-            <div class="card border-primary">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-simple me-2"></i>Sales Report</h5>
-                    <small class="opacity-75">Key metrics at a glance</small>
+            <div class="card">
+                <div class="card-header">
+                    <h5>Quick Actions</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <!-- Today's Sales -->
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100 border-success">
-                                <div class="card-body text-center">
-                                    <div class="mb-3">
-                                        <i class="fas fa-sun fa-3x text-warning"></i>
-                                    </div>
-                                    <h6 class="text-muted mb-2">Today's Sales</h6>
-                                    <h3 class="fw-bold text-success">LKR @Model.TodaysSales.ToString("N0")</h3>
-                                    <small class="text-muted">@DateTime.Now.ToString("dd MMM yyyy")</small>
-                                </div>
-                            </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <a href="/Medicines" class="btn btn-outline-primary btn-lg p-3">
+                                <i class="fas fa-plus-circle fa-2x mb-2"></i><br>
+                                Add Stock
+                            </a>
                         </div>
-
-                        <!-- Net Sales -->
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100 border-primary">
-                                <div class="card-body text-center">
-                                    <div class="mb-3">
-                                        <i class="fas fa-calculator fa-3x text-primary"></i>
-                                    </div>
-                                    <h6 class="text-muted mb-2">Monthly Sales</h6>
-                                    <h3 class="fw-bold text-primary">LKR @Model.NetSales.ToString("N0")</h3>
-                                    <small class="text-muted">Sales - Returns</small>
-                                </div>
-                            </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <a href="/Inventory/StockAdjustment" class="btn btn-outline-warning btn-lg p-3">
+                                <i class="fas fa-edit fa-2x mb-2"></i><br>
+                                Adjust Stock
+                            </a>
                         </div>
-                    </div>
-
-                    <!-- Returns Summary -->
-                    <div class="row mt-3">
-                        <div class="col-md-6 mb-3">
-                            <div class="card h-100 border-warning">
-                                <div class="card-body text-center">
-                                    <h6 class="text-muted mb-2">Today's Returns</h6>
-                                    <h3 class="fw-bold text-warning">LKR @Model.TodaysReturns.ToString("N0")</h3>
-                                    <small class="text-muted">Refunds & Returns</small>
-                                </div>
-                            </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <a href="/Inventory/StockReport" class="btn btn-outline-info btn-lg p-3">
+                                <i class="fas fa-chart-bar fa-2x mb-2"></i><br>
+                                Stock Report
+                            </a>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="card h-100 border-secondary">
-                                <div class="card-body text-center">
-                                    <h6 class="text-muted mb-2">Monthly Returns</h6>
-                                    <h3 class="fw-bold text-secondary">LKR @Model.TotalReturns.ToString("N0")</h3>
-                                    <small class="text-muted">Total returns this month</small>
-                                </div>
-                            </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <a href="/Medicines" class="btn btn-outline-danger btn-lg p-3">
+                                <i class="fas fa-pills fa-2x mb-2"></i><br>
+                                View Medicines
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -88,529 +122,47 @@
         </div>
     </div>
 
-    <!-- Main Dashboard Cards -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-lg-6 mb-4">
-            <div class="card bg-primary text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-white-50">Total Medicines</h6>
-                            <h2 class="fw-bold">@Model.TotalMedicines</h2>
-                        </div>
-                        <i class="fas fa-pills fa-3x opacity-50"></i>
-                    </div>
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="text-white small stretched-link" href="/Medicines">View Details</a>
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-lg-6 mb-4">
-            <div class="card bg-success text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-white-50">Total Customers</h6>
-                            <h2 class="fw-bold">@Model.TotalCustomers</h2>
-                        </div>
-                        <i class="fas fa-users fa-3x opacity-50"></i>
-                    </div>
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="text-white small stretched-link" href="/Customer/Register">Register New</a>
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-lg-6 mb-4">
-            <div class="card bg-info text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-white-50">Today's Sales</h6>
-                            <h2 class="fw-bold">LKR @Model.TodaysSales.ToString("N0")</h2>
-                        </div>
-                        <i class="fas fa-shopping-cart fa-3x opacity-50"></i>
-                    </div>
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="text-white small stretched-link" href="/Billing/CustomerInvoice">Create Bill</a>
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-lg-6 mb-4">
-            <div class="card bg-warning text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-white-50">Monthly Sales</h6>
-                            <h2 class="fw-bold">LKR @Model.TotalSale.ToString("N0")</h2>
-                        </div>
-                        <i class="fas fa-chart-line fa-3x opacity-50"></i>
-                    </div>
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="text-white small stretched-link" href="#monthlyChart">View Report</a>
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Sales vs Purchase Chart -->
-    <div class="row mb-4">
-        <div class="col-md-6 mb-4">
-            <div class="card h-150">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-balance-scale me-2"></i>Sales vs Purchase (Last 6 Months)</h5>
-                    <small class="opacity-75">Comparison of Sales and Purchase amounts</small>
-                </div>
-                <div class="card-body">
-                    <canvas id="salesVsPurchaseChart" height="900"></canvas>
-                </div>
-                <div class="card-footer">
-                    <div class="row text-center">
-                        <div class="col-6">
-                            <small class="text-muted d-block">Total Purchase</small>
-                            <strong class="text-danger">LKR @Model.SalesVsPurchaseData.Sum(s => s.Purchase).ToString("N0")</strong>
-                        </div>
-                        <div class="col-6">
-                            <small class="text-muted d-block">Total Sales</small>
-                            <strong class="text-success">LKR @Model.SalesVsPurchaseData.Sum(s => s.Sales).ToString("N0")</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Top 5 Selling Medicines Chart -->
-        <div class="col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Top 5 Selling Medicines</h5>
-                    <small class="opacity-75">Current Month: @DateTime.Now.ToString("MMMM yyyy")</small>
-                </div>
-                <div class="card-body">
-                    <canvas id="topMedicinesChart" height="250"></canvas>
-                </div>
-                <div class="card-footer">
-                    <div class="table-responsive">
-                        <table class="table table-sm table-borderless mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Medicine</th>
-                                    <th class="text-end">Quantity</th>
-                                    <th class="text-end">Sales (LKR)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var medicine in Model.TopSellingMedicines)
-                                {
-                                    <tr>
-                                        <td>@medicine.MedicineName</td>
-                                        <td class="text-end">@medicine.QuantitySold.ToString("N0")</td>
-                                        <td class="text-end">@medicine.TotalSales.ToString("N2")</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Daily Progress Chart - Now full width since Income Expense Statement removed -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Daily Sales Progress</h5>
-                    <small class="opacity-75">Last 7 Days</small>
-                </div>
-                <div class="card-body">
-                    <canvas id="dailyProgressChart" height="300"></canvas>
-                </div>
-                <div class="card-footer">
-                    <div class="row text-center">
-                        <div class="col-3">
-                            <small class="text-muted d-block">Today</small>
-                            <strong>LKR @Model.TodaysSales.ToString("N0")</strong>
-                        </div>
-                        <div class="col-3">
-                            <small class="text-muted d-block">Yesterday</small>
-                            @{
-                                var yesterdaySales = Model.DailySales.Count >= 2 ? Model.DailySales[^2].TotalSales : 0;
-                            }
-                            <strong>LKR @yesterdaySales.ToString("N0")</strong>
-                        </div>
-                        <div class="col-3">
-                            <small class="text-muted d-block">7-Day Avg</small>
-                            <strong>LKR @(Model.DailySales.Count > 0 ? Model.DailySales.Average(d => d.TotalSales).ToString("N0") : "0")</strong>
-                        </div>
-                        <div class="col-3">
-                            <small class="text-muted d-block">Change</small>
-                            @{
-                                var changePercent = yesterdaySales > 0 ?
-                                ((Model.TodaysSales - yesterdaySales) / yesterdaySales * 100) : 0;
-                                var changeClass = changePercent >= 0 ? "text-success" : "text-danger";
-                                var changeIcon = changePercent >= 0 ? "fa-arrow-up" : "fa-arrow-down";
-                            }
-                            <strong class="@changeClass">
-                                <i class="fas @changeIcon me-1"></i>
-                                @Math.Abs(changePercent).ToString("N1")%
-                            </strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Return Customers and Products Section -->
-    <div class="row mb-4">
-        <!-- Top 10 Return Customers -->
-        <div class="col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0"><i class="fas fa-user-times me-2"></i>Top 10 Return Customers</h5>
-                    <small class="opacity-75">Last 30 Days - Highest Return Values</small>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover table-sm">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>#</th>
-                                    <th>Customer Name</th>
-                                    <th class="text-end">Returns</th>
-                                    <th class="text-end">Value (LKR)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @{
-                                    int customerRank = 1;
-                                    decimal totalCustomerReturns = Model.TopReturnCustomers.Sum(c => c.TotalReturnValue);
-                                }
-                                @foreach (var customer in Model.TopReturnCustomers)
-                                {
-                                    var percentage = totalCustomerReturns > 0 ? (customer.TotalReturnValue / totalCustomerReturns * 100) : 0;
-                                    <tr>
-                                        <td class="fw-bold">@customerRank</td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar-sm bg-danger bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2">
-                                                    <i class="fas fa-user text-danger"></i>
-                                                </div>
-                                                <span>@customer.CustomerName</span>
-                                            </div>
-                                        </td>
-                                        <td class="text-end">
-                                            <span class="badge bg-danger bg-opacity-10 text-danger">@customer.ReturnCount</span>
-                                        </td>
-                                        <td class="text-end fw-bold">
-                                            @customer.TotalReturnValue.ToString("N2")
-                                        </td>
-                                    </tr>
-                                    customerRank++;
-                                }
-                            </tbody>
-                            <tfoot class="table-secondary">
-                                <tr>
-                                    <th colspan="3" class="text-end">Total:</th>
-                                    <th class="text-end">LKR @totalCustomerReturns.ToString("N2")</th>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Based on return values in last 30 days
-                        </small>
-                        <a href="/PRN" class="btn btn-sm btn-outline-danger">
-                            <i class="fas fa-external-link-alt me-1"></i>View All
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Return Products List -->
-        <div class="col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0"><i class="fas fa-undo-alt me-2"></i>Return Products List</h5>
-                    <small class="opacity-75">Last 30 Days - Frequently Returned Items</small>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover table-sm">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>#</th>
-                                    <th>Product Name</th>
-                                    <th class="text-end">Qty</th>
-                                    <th class="text-end">Value (LKR)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @{
-                                    int productRank = 1;
-                                    decimal totalProductReturns = Model.ReturnProducts.Sum(p => p.ReturnValue);
-                                }
-                                @foreach (var product in Model.ReturnProducts)
-                                {
-                                    var percentage = totalProductReturns > 0 ? (product.ReturnValue / totalProductReturns * 100) : 0;
-                                    <tr>
-                                        <td class="fw-bold">@productRank</td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar-sm bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2">
-                                                    <i class="fas fa-pills text-warning"></i>
-                                                </div>
-                                                <div>
-                                                    <div>@product.ProductName</div>
-                                                    <small class="text-muted">Returns: @product.ReturnCount</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="text-end">
-                                            <span class="badge bg-warning bg-opacity-10 text-dark">@product.ReturnQuantity</span>
-                                        </td>
-                                        <td class="text-end fw-bold">
-                                            @product.ReturnValue.ToString("N2")
-                                        </td>
-                                    </tr>
-                                    productRank++;
-                                }
-                            </tbody>
-                            <tfoot class="table-secondary">
-                                <tr>
-                                    <th colspan="3" class="text-end">Total:</th>
-                                    <th class="text-end">LKR @totalProductReturns.ToString("N2")</th>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Total returned items in last 30 days
-                        </small>
-                        <a href="/PRN" class="btn btn-sm btn-outline-warning">
-                            <i class="fas fa-external-link-alt me-1"></i>Manage Returns
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Monthly Sales Chart -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Monthly Sales Report (Last 6 Months)</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="monthlySalesChart" height="100"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Outstanding Invoice Report Section -->
+    <!-- Recent Activity -->
     <div class="row mt-4">
-        <div class="col-12">
+        <div class="col-md-6">
             <div class="card">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Outstanding Invoices Report</h5>
-                    <small class="text-dark">Pending payments from customers</small>
+                <div class="card-header">
+                    <h5>Recent Stock Updates</h5>
                 </div>
                 <div class="card-body">
-                    <!-- Summary Cards -->
-                    <div class="row mb-4">
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <div class="card border-warning">
-                                <div class="card-body text-center">
-                                    <h6 class="text-muted mb-2">Total Outstanding</h6>
-                                    <h3 class="text-warning fw-bold">LKR @Model.TotalOutstanding.ToString("N2")</h3>
+                    <div class="list-group">
+                        @foreach (var update in Model.RecentStockUpdates)
+                        {
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>@update.MedicineName</strong><br>
+                                    <small>Batch: @update.BatchNumber | Qty: @update.Quantity</small>
                                 </div>
+                                <span class="badge bg-info rounded-pill">@update.UpdateDate.ToString("MMM dd")</span>
                             </div>
-                        </div>
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <div class="card border-info">
-                                <div class="card-body text-center">
-                                    <h6 class="text-muted mb-2">Open Invoices</h6>
-                                    <h3 class="text-info fw-bold">@Model.OpenInvoiceCount</h3>
-                                </div>
-                            </div>
-                        </div>
-
-                    <!-- Outstanding Invoices Table -->
-                    <div class="table-responsive">
-                        <table class="table table-hover table-sm">
-                            <thead class="table-warning">
-                                <tr>
-                                    <th>#</th>
-                                    <th>Customer</th>
-                                    <th class="text-end">Invoice No</th>
-                                    <th class="text-end">Invoice Date</th>
-                                    <th class="text-end">Due Date</th>
-                                    <th class="text-end">Days Overdue</th>
-                                    <th class="text-end">Invoice Value</th>
-                                    <th class="text-end">Paid Amount</th>
-                                    <th class="text-end">Return Value</th>
-                                    <th class="text-end">Balance</th>
-                                    @* <th class="text-end">Status</th> *@
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @{
-                                    int outstandingRank = 1;
-                                }
-                                @foreach (var invoice in Model.OutstandingInvoices)
-                                {
-                                    var daysOverdue = (DateTime.Today - invoice.DueDate).Days;
-                                    var statusClass = daysOverdue > 30 ? "danger" :
-                                    daysOverdue > 15 ? "warning" : "info";
-
-                                    <tr>
-                                        <td class="fw-bold">@outstandingRank</td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar-sm bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2">
-                                                    <i class="fas fa-user text-warning"></i>
-                                                </div>
-                                                <div>
-                                                    <div>@invoice.CustomerName</div>
-                                                    <small class="text-muted">@invoice.CustomerPhone</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="text-end">
-                                            <span class="badge bg-dark">@invoice.InvoiceNumber</span>
-                                        </td>
-                                        <td class="text-end">@invoice.InvoiceDate.ToString("dd-MMM-yyyy")</td>
-                                        <td class="text-end">@invoice.DueDate.ToString("dd-MMM-yyyy")</td>
-                                        <td class="text-end">
-                                            @if (daysOverdue > 0)
-                                            {
-                                                <span class="badge bg-@statusClass">@daysOverdue Days</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-success">On Time</span>
-                                            }
-                                        </td>
-                                        <td class="text-end fw-bold">@invoice.InvoiceValue.ToString("N2")</td>
-                                        <td class="text-end">@invoice.PaidAmount.ToString("N2")</td>
-                                        <td class="text-end">@invoice.ReturnValue.ToString("N2")</td>
-                                        <td class="text-end fw-bold text-danger">@invoice.BalanceAmount.ToString("N2")</td>
-                                        @* <td class="text-end">
-                                            @if (daysOverdue > 30)
-                                            {
-                                                <span class="badge bg-danger">Severe Overdue</span>
-                                            }
-                                            else if (daysOverdue > 15)
-                                            {
-                                                <span class="badge bg-warning">Overdue</span>
-                                            }
-                                            else if (daysOverdue > 0)
-                                            {
-                                                <span class="badge bg-info">Due Soon</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-success">Active</span>
-                                            }
-                                        </td> *@
-                                    </tr>
-                                    outstandingRank++;
-                                }
-                            </tbody>
-                            <tfoot class="table-secondary">
-                                <tr>
-                                    <th colspan="6" class="text-end">Totals:</th>
-                                    <th class="text-end">LKR @Model.OutstandingInvoices.Sum(i => i.InvoiceValue).ToString("N2")</th>
-                                    <th class="text-end">LKR @Model.OutstandingInvoices.Sum(i => i.PaidAmount).ToString("N2")</th>
-                                    <th class="text-end">LKR @Model.OutstandingInvoices.Sum(i => i.ReturnValue).ToString("N2")</th>
-                                    <th class="text-end text-danger">LKR @Model.OutstandingInvoices.Sum(i => i.BalanceAmount).ToString("N2")</th>
-                                    <th></th>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Showing @Model.OutstandingInvoices.Count outstanding invoices
-                        </small>
-                        <a href="/OutStandingReport" class="btn btn-sm btn-warning">
-                            <i class="fas fa-external-link-alt me-1"></i>View Full Report
-                        </a>
+                        }
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Net Sales Breakdown Section -->
-    <div class="row mt-4">
-        <div class="col-md-8 offset-md-2">
+        <div class="col-md-6">
             <div class="card">
-                <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Net Sales Breakdown - @DateTime.Now.ToString("MMMM yyyy")</h5>
+                <div class="card-header">
+                    <h5>Critical Stock Alerts</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-md-4 mb-3">
-                            <div class="p-3 border rounded bg-success bg-opacity-10">
-                                <h6 class="text-success">Total Sales</h6>
-                                <h3 class="fw-bold">LKR @Model.TotalSale.ToString("N0")</h3>
-                                <small class="text-muted">Gross Sales Amount</small>
+                    <div class="list-group">
+                        @foreach (var alert in Model.CriticalAlerts)
+                        {
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>@alert.MedicineName</strong><br>
+                                    <small>Stock: @alert.CurrentStock units | Min: @alert.MinimumStock</small>
+                                </div>
+                                <span class="badge bg-danger rounded-pill">@alert.AlertType</span>
                             </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="p-3 border rounded bg-danger bg-opacity-10">
-                                <h6 class="text-danger">Total Returns</h6>
-                                <h3 class="fw-bold">LKR @Model.TotalReturns.ToString("N0")</h3>
-                                <small class="text-muted">Returns & Refunds</small>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="p-3 border rounded bg-primary bg-opacity-10">
-                                <h6 class="text-primary">Net Sales</h6>
-                                <h3 class="fw-bold">LKR @Model.NetSales.ToString("N0")</h3>
-                                <small class="text-muted">Actual Revenue</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <div class="progress" style="height: 30px;">
-                            <div class="progress-bar bg-success"
-                                 style="width: @(Model.TotalSale > 0 ? (Model.TotalSale / (Model.TotalSale + Model.TotalReturns) * 100).ToString("0") : "0")%">
-                                <span class="fw-bold">Sales: @(Model.TotalSale > 0 ? (Model.TotalSale / (Model.TotalSale + Model.TotalReturns) * 100).ToString("0") : "0")%</span>
-                            </div>
-                            <div class="progress-bar bg-danger"
-                                 style="width: @(Model.TotalReturns > 0 ? (Model.TotalReturns / (Model.TotalSale + Model.TotalReturns) * 100).ToString("0") : "0")%">
-                                <span class="fw-bold">Returns: @(Model.TotalReturns > 0 ? (Model.TotalReturns / (Model.TotalSale + Model.TotalReturns) * 100).ToString("0") : "0")%</span>
-                            </div>
-                        </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -618,489 +170,27 @@
     </div>
 </div>
 
-<!-- Add Font Awesome -->
+<!-- Add Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-<!-- Add Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Monthly Sales Chart
-        var monthlyCtx = document.getElementById('monthlySalesChart').getContext('2d');
-        var monthlyMonths = @Html.Raw(Json.Serialize(Model.MonthlySales.Select(m => m.MonthName).ToArray()));
-        var monthlySales = @Html.Raw(Json.Serialize(Model.MonthlySales.Select(m => m.TotalSales).ToArray()));
-
-        var monthlyChart = new Chart(monthlyCtx, {
-            type: 'line',
-            data: {
-                labels: monthlyMonths,
-                datasets: [{
-                    label: 'Sales (LKR)',
-                    data: monthlySales,
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return 'Sales: LKR ' + context.parsed.y.toLocaleString('en-US', {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                });
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return 'LKR ' + value.toLocaleString('en-US', {
-                                    minimumFractionDigits: 0,
-                                    maximumFractionDigits: 0
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        // Daily Progress Chart
-        var dailyCtx = document.getElementById('dailyProgressChart').getContext('2d');
-        var dailyDates = @Html.Raw(Json.Serialize(Model.DailySales.Select(d => d.DisplayDate).ToArray()));
-        var dailySales = @Html.Raw(Json.Serialize(Model.DailySales.Select(d => d.TotalSales).ToArray()));
-
-        var dailyChart = new Chart(dailyCtx, {
-            type: 'bar',
-            data: {
-                labels: dailyDates,
-                datasets: [{
-                    label: 'Daily Sales',
-                    data: dailySales,
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.7)',
-                        'rgba(54, 162, 235, 0.7)',
-                        'rgba(255, 206, 86, 0.7)',
-                        'rgba(75, 192, 192, 0.7)',
-                        'rgba(153, 102, 255, 0.7)',
-                        'rgba(255, 159, 64, 0.7)',
-                        'rgba(40, 167, 69, 0.7)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)',
-                        'rgba(255, 159, 64, 1)',
-                        'rgba(40, 167, 69, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return 'Sales: LKR ' + context.parsed.y.toLocaleString('en-US', {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                });
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return 'LKR ' + value.toLocaleString('en-US', {
-                                    minimumFractionDigits: 0,
-                                    maximumFractionDigits: 0
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        // Sales vs Purchase Chart
-        var salesVsPurchaseCtx = document.getElementById('salesVsPurchaseChart').getContext('2d');
-        var salesVsPurchaseMonths = @Html.Raw(Json.Serialize(Model.SalesVsPurchaseData.Select(s => s.MonthName).ToArray()));
-        var salesData = @Html.Raw(Json.Serialize(Model.SalesVsPurchaseData.Select(s => s.Sales).ToArray()));
-        var purchaseData = @Html.Raw(Json.Serialize(Model.SalesVsPurchaseData.Select(s => s.Purchase).ToArray()));
-
-        var salesVsPurchaseChart = new Chart(salesVsPurchaseCtx, {
-            type: 'bar',
-            data: {
-                labels: salesVsPurchaseMonths,
-                datasets: [
-                    {
-                        label: 'Sales',
-                        data: salesData,
-                        backgroundColor: 'rgba(40, 167, 69, 0.7)',
-                        borderColor: 'rgba(40, 167, 69, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Purchase',
-                        data: purchaseData,
-                        backgroundColor: 'rgba(220, 53, 69, 0.7)',
-                        borderColor: 'rgba(220, 53, 69, 1)',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.dataset.label + ': LKR ' + context.parsed.y.toLocaleString('en-US', {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                });
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return 'LKR ' + value.toLocaleString('en-US', {
-                                    minimumFractionDigits: 0,
-                                    maximumFractionDigits: 0
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        // Top 5 Selling Medicines Chart
-        var topMedicinesCtx = document.getElementById('topMedicinesChart').getContext('2d');
-        var medicineNames = @Html.Raw(Json.Serialize(Model.TopSellingMedicines.Select(m => m.MedicineName).ToArray()));
-        var medicineQuantities = @Html.Raw(Json.Serialize(Model.TopSellingMedicines.Select(m => m.QuantitySold).ToArray()));
-        var medicineSales = @Html.Raw(Json.Serialize(Model.TopSellingMedicines.Select(m => m.TotalSales).ToArray()));
-
-        var topMedicinesChart = new Chart(topMedicinesCtx, {
-            type: 'doughnut',
-            data: {
-                labels: medicineNames,
-                datasets: [{
-                    data: medicineQuantities,
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.8)',
-                        'rgba(54, 162, 235, 0.8)',
-                        'rgba(255, 206, 86, 0.8)',
-                        'rgba(75, 192, 192, 0.8)',
-                        'rgba(153, 102, 255, 0.8)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            boxWidth: 12,
-                            padding: 15
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                var label = context.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                label += context.parsed + ' units';
-                                label += ' (LKR ' + medicineSales[context.dataIndex].toLocaleString('en-US', {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2
-                                }) + ')';
-                                return label;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    });
-
-    // Auto-refresh every 5 minutes
-    setTimeout(function() {
-        window.location.reload();
-    }, 5 * 60 * 1000);
-</script>
-
 <style>
-    body {
-        background-color: #f8f9fa;
-    }
-
     .card {
+        transition: transform 0.2s;
         border: none;
         border-radius: 10px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        transition: transform 0.3s, box-shadow 0.3s;
     }
 
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
-
-    .card-header {
-        border-radius: 10px 10px 0 0 !important;
-        font-weight: 600;
-    }
 
     .btn {
         border-radius: 8px;
-        font-weight: 500;
         transition: all 0.3s;
     }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transform: scale(1.05);
         }
-
-    h1.display-5 {
-        color: #2c3e50;
-        font-weight: 700;
-    }
-
-    .lead {
-        color: #6c757d;
-    }
-
-    .table tbody tr:hover {
-        background-color: rgba(0,0,0,0.02);
-    }
-
-    .text-success {
-        color: #28a745 !important;
-    }
-
-    .text-danger {
-        color: #dc3545 !important;
-    }
-
-    .text-warning {
-        color: #ffc107 !important;
-    }
-
-    .text-info {
-        color: #17a2b8 !important;
-    }
-
-    .text-secondary {
-        color: #6c757d !important;
-    }
-
-    .bg-light {
-        background-color: #f8f9fa !important;
-    }
-
-    .stretched-link::after {
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        z-index: 1;
-        content: "";
-    }
-
-    /* Chart container styles */
-    canvas {
-        max-height: 300px;
-        width: 100% !important;
-    }
-
-    .card-footer {
-        background-color: #f8f9fa;
-        border-top: 1px solid rgba(0,0,0,0.125);
-    }
-
-    .table-sm th,
-    .table-sm td {
-        padding: 0.5rem;
-    }
-
-    /* Full width daily chart */
-    #dailyProgressChart {
-        max-height: 350px;
-    }
-
-    /* New styles for returns card */
-    .bg-secondary {
-        background: linear-gradient(45deg, #6c757d, #5a6268) !important;
-    }
-
-    /* New styles for net sales card */
-    .bg-dark {
-        background: linear-gradient(45deg, #343a40, #212529) !important;
-    }
-
-    /* Progress bar styles */
-    .progress {
-        border-radius: 15px;
-        overflow: hidden;
-    }
-
-    .progress-bar {
-        position: relative;
-        font-size: 0.8rem;
-    }
-
-        .progress-bar span {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
-
-    /* Info text in net sales card */
-    .text-white-75 {
-        color: rgba(255, 255, 255, 0.75);
-    }
-
-    /* New styles for return tables */
-    .avatar-sm {
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .table tbody tr:hover {
-        background-color: rgba(0,0,0,0.03);
-    }
-
-    .badge {
-        padding: 0.35em 0.65em;
-        font-size: 0.75em;
-        font-weight: 600;
-    }
-
-    .bg-danger.bg-opacity-10 {
-        background-color: rgba(220, 53, 69, 0.1) !important;
-    }
-
-    .bg-warning.bg-opacity-10 {
-        background-color: rgba(255, 193, 7, 0.1) !important;
-    }
-
-    .table-sm th,
-    .table-sm td {
-        padding: 0.75rem;
-        vertical-align: middle;
-    }
-
-    .card-footer {
-        background-color: #f8f9fa;
-        border-top: 1px solid rgba(0,0,0,0.125);
-    }
-
-    .btn-sm {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
-    }
-
-    .rounded-circle {
-        border-radius: 50% !important;
-    }
-
-    /* Custom scrollbar for tables */
-    .table-responsive {
-        max-height: 400px;
-        overflow-y: auto;
-    }
-
-        .table-responsive::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .table-responsive::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
-        }
-
-        .table-responsive::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
-        }
-
-            .table-responsive::-webkit-scrollbar-thumb:hover {
-                background: #555;
-            }
-
-    /* New styles for Outstanding Invoice Report */
-    .border-warning {
-        border-color: #ffc107 !important;
-    }
-
-    .border-info {
-        border-color: #17a2b8 !important;
-    }
-
-    .border-success {
-        border-color: #28a745 !important;
-    }
-
-    .border-danger {
-        border-color: #dc3545 !important;
-    }
-
-    .table-warning {
-        background-color: rgba(255, 193, 7, 0.1);
-    }
-
-    .bg-warning.bg-opacity-10 {
-        background-color: rgba(255, 193, 7, 0.1) !important;
-    }
 </style>

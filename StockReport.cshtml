@@ -1,0 +1,292 @@
+﻿@page
+@model PHARMACY.Pages.Inventory.StockReportModel
+@{
+    ViewData["Title"] = "Stock Report";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 text-primary">📊 Stock Report</h1>
+            <p class="lead">Comprehensive overview of all medicine stocks</p>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="searchString" class="form-label">Search Medicine</label>
+                            <input type="text" class="form-control" id="searchString" name="searchString" value="@Model.SearchString" placeholder="Enter medicine name...">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="stockStatus" class="form-label">Stock Status</label>
+                            <select class="form-select" id="stockStatus" name="stockStatus">
+                                <option value="">All</option>
+                                <option value="InStock" selected="@(Model.StockStatus == "InStock")">In Stock</option>
+                                <option value="LowStock" selected="@(Model.StockStatus == "LowStock")">Low Stock</option>
+                                <option value="OutOfStock" selected="@(Model.StockStatus == "OutOfStock")">Out of Stock</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="sortBy" class="form-label">Sort By</label>
+                            <select class="form-select" id="sortBy" name="sortBy">
+                                <option value="Name" selected="@(Model.SortBy == "Name")">Name</option>
+                                <option value="Stock" selected="@(Model.SortBy == "Stock")">Stock Level</option>
+                                <option value="Expiry" selected="@(Model.SortBy == "Expiry")">Expiry Date</option>
+                                <option value="Price" selected="@(Model.SortBy == "Price")">Price</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">Apply Filters</button>
+                            <a href="/Inventory/StockReport" class="btn btn-outline-secondary">Reset</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mt-4">
+        <div class="col-md-2 mb-4">
+            <div class="card text-white bg-info">
+                <div class="card-body text-center">
+                    <h6>Total Items</h6>
+                    <h4>@Model.TotalItems</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-4">
+            <div class="card text-white bg-warning">
+                <div class="card-body text-center">
+                    <h6>Low Stock</h6>
+                    <h4>@Model.LowStockCount</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-4">
+            <div class="card text-white bg-danger">
+                <div class="card-body text-center">
+                    <h6>Out of Stock</h6>
+                    <h4>@Model.OutOfStockCount</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card text-white bg-success">
+                <div class="card-body text-center">
+                    <h6>Total Stock Value</h6>
+                    <h4>Rs. @Model.TotalStockValue.ToString("N2")</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Report Table -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Medicine Stock Report</h5>
+                    <div>
+                        <a href="javascript:window.print()" class="btn btn-outline-primary btn-sm me-2">
+                            <i class="fas fa-print"></i> Print Report
+                        </a>
+                        <a href="/Inventory/ExportStockReport" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-download"></i> Export
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.StockItems.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover mb-0" style="table-layout: fixed;">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th style="width: 25%; padding: 0.5rem;">Medicine Name</th>
+                                        <th style="width: 15%; padding: 0.5rem;">Batch Number</th>
+                                        <th style="width: 15%; padding: 0.5rem;">Current Stock</th>
+                                        <th style="width: 20%; padding: 0.5rem;">Expiry Date</th>
+                                        <th style="width: 15%; padding: 0.5rem;">Stock Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.StockItems)
+                                    {
+                                        <tr>
+                                            <td style="padding: 0.5rem;">
+                                                <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                                                    <strong style="font-size: 0.9rem;">@item.MedicineName</strong>
+                                                    @if (!string.IsNullOrEmpty(item.Description))
+                                                    {
+                                                        <small style="font-size: 0.8rem; color: #6c757d; margin-top: 2px;">@item.Description</small>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td style="padding: 0.5rem; vertical-align: middle; font-size: 0.9rem;">@item.BatchNumber</td>
+                                            <td style="padding: 0.5rem; vertical-align: middle;">
+                                                <span class="badge @GetStockBadgeClass(item.CurrentStock, item.MinimumStock)" style="font-size: 0.8rem; padding: 0.25rem 0.5rem;">
+                                                    @item.CurrentStock units
+                                                </span>
+                                            </td>
+                                            <td style="padding: 0.5rem; vertical-align: middle;">
+                                                <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                                                    <span class="@GetExpiryClass(item.ExpiryDate)" style="font-size: 0.9rem;">
+                                                        @item.ExpiryDate.ToString("MMM dd, yyyy")
+                                                    </span>
+                                                    @if (IsExpiringSoon(item.ExpiryDate))
+                                                    {
+                                                        <span class="badge bg-danger mt-1" style="font-size: 0.7rem; padding: 0.2rem 0.4rem; align-self: flex-start;">Expiring Soon</span>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td style="padding: 0.5rem; vertical-align: middle;">
+                                                <strong style="font-size: 0.9rem;">Rs. @item.StockValue.ToString("N2")</strong>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <td colspan="4" class="text-end" style="padding: 0.75rem;"><strong>Total Value</strong></td>
+                                        <td class="text-end" style="padding: 0.75rem;">
+                                            <strong class="text-success">Rs. @Model.TotalStockValue.ToString("N2")</strong>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle"></i> No stock items found matching your criteria.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetStockBadgeClass(int currentStock, int minimumStock)
+    {
+        if (currentStock == 0) return "bg-danger";
+        if (currentStock <= minimumStock) return "bg-warning";
+        return "bg-success";
+    }
+
+    private string GetExpiryClass(DateTime expiryDate)
+    {
+        if (expiryDate <= DateTime.Today.AddDays(30)) return "text-danger fw-bold";
+        if (expiryDate <= DateTime.Today.AddDays(60)) return "text-warning";
+        return "text-success";
+    }
+
+    private bool IsExpiringSoon(DateTime expiryDate)
+    {
+        return expiryDate <= DateTime.Today.AddDays(30);
+    }
+}
+
+<!-- Add Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    .card {
+        transition: transform 0.2s;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        background-color: #343a40;
+        color: white;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    .badge {
+        font-size: 0.8em;
+        padding: 0.25em 0.5em;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0,0,0,0.075);
+    }
+
+    .table tbody td {
+        vertical-align: middle;
+        font-size: 0.85rem;
+    }
+
+    /* Compact table styling */
+    .table {
+        margin-bottom: 0;
+    }
+
+        .table td, .table th {
+            padding: 0.5rem !important;
+        }
+
+        .table tbody tr {
+            height: 50px; /* Fixed row height for consistency */
+        }
+
+    @@media print {
+        .btn, .card-header .btn, .navbar, .footer {
+            display: none !important;
+        }
+
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #dee2e6 !important;
+        }
+
+        .table th {
+            background-color: #000 !important;
+            color: #fff !important;
+        }
+
+        .d-flex.flex-column {
+            display: block !important;
+        }
+
+        .mt-1 {
+            margin-top: 0.25rem !important;
+        }
+
+        .table {
+            font-size: 10pt !important;
+        }
+
+            .table td, .table th {
+                padding: 0.3rem !important;
+            }
+    }
+
+    /* Custom compact styles */
+    .compact-cell {
+        padding: 0.3rem !important;
+        margin: 0 !important;
+    }
+
+    .compact-text {
+        font-size: 0.85rem;
+        line-height: 1.2;
+        margin: 0;
+    }
+</style>
